@@ -19,11 +19,16 @@ dependencies = [
     # Vector databases
     "asyncpg>=0.30.0",
     "pgvector>=0.3.0",
+    # Tools
+    "tavily-python>=0.5.0",
     # Observability
     "opentelemetry-api>=1.27.0",
     "opentelemetry-sdk>=1.27.0",
     "opentelemetry-exporter-otlp>=1.27.0",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["core", "adapters", "apps"]
 
 [project.optional-dependencies]
 dev = [

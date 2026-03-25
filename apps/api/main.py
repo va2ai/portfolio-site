@@ -14,7 +14,18 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up...")
-    # Initialize providers, connections, registries here
+
+    # Register built-in tools
+    from core.tools.registry import tool_registry
+    from core.tools.builtins.web_search import WebSearchTool
+    from core.tools.builtins.calculator import CalculatorTool
+    from core.tools.builtins.tavily_search import TavilySearchTool
+
+    tool_registry.register(WebSearchTool())
+    tool_registry.register(CalculatorTool())
+    tool_registry.register(TavilySearchTool())
+    logger.info(f"Registered tools: {tool_registry.tool_names}")
+
     yield
     logger.info("Shutting down...")
 
@@ -36,6 +47,7 @@ def create_app() -> FastAPI:
     from .routes.tools import router as tools_router
     from .routes.retrieval import router as retrieval_router
     from .routes.chat import router as chat_router
+    from .routes.search import router as search_router
     from .routes.ui import router as ui_router
 
     app.include_router(health_router)
@@ -43,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(tools_router, prefix="/api")
     app.include_router(retrieval_router, prefix="/api")
     app.include_router(chat_router, prefix="/api")
+    app.include_router(search_router, prefix="/api")
     app.include_router(ui_router)
 
     return app

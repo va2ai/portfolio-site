@@ -199,6 +199,95 @@ HTML_PAGE = """<!DOCTYPE html>
     font-style: italic;
   }
 
+  .msg .msg-actions {
+    display: none;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .msg:hover .msg-actions { display: flex; }
+
+  .msg-actions button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .msg-actions button:hover {
+    color: var(--text);
+    border-color: var(--text2);
+  }
+
+  .msg-actions button.delete:hover {
+    color: var(--red);
+    border-color: var(--red);
+  }
+
+  .msg .edit-area {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .msg .edit-area textarea {
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    padding: 8px;
+    resize: vertical;
+    min-height: 60px;
+    outline: none;
+  }
+
+  .msg .edit-area .edit-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .msg .edit-area .edit-btns button {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .msg .edit-area .edit-btns .save-btn {
+    background: var(--accent);
+    color: white;
+  }
+
+  .msg .edit-area .edit-btns .cancel-btn {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  .clear-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .clear-btn:hover {
+    color: var(--red);
+    border-color: var(--red);
+  }
+
   .welcome {
     flex: 1;
     display: flex;
@@ -298,6 +387,7 @@ HTML_PAGE = """<!DOCTYPE html>
   <div class="status-bar">
     <span class="badge" id="statusBadge">Checking...</span>
     <span class="badge" id="modelBadge">--</span>
+    <button class="clear-btn" onclick="clearChat()">Clear chat</button>
   </div>
 </header>
 
@@ -371,6 +461,11 @@ HTML_PAGE = """<!DOCTYPE html>
         <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" />
         <button id="sendBtn" onclick="sendMessage()">Send</button>
       </div>
+      <div style="max-width:760px;margin:8px auto 0;display:flex;align-items:center;gap:8px;">
+        <label style="font-size:11px;color:var(--text2);white-space:nowrap;">System prompt:</label>
+        <input type="text" id="systemPrompt" value="You are a helpful AI assistant. You have access to a tavily_search tool for searching the web. When the user asks about current events, recent information, or anything you're unsure about, use the tavily_search tool to find accurate answers."
+          style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;outline:none;" />
+      </div>
     </div>
   </div>
 </div>
@@ -380,34 +475,151 @@ HTML_PAGE = """<!DOCTYPE html>
   const inputEl = document.getElementById('chatInput');
   const sendBtn = document.getElementById('sendBtn');
   const modelSelect = document.getElementById('modelSelect');
+  const systemPromptEl = document.getElementById('systemPrompt');
 
   let msgCount = 0;
   let totalTokens = 0;
   let totalLatency = 0;
   let welcomeVisible = true;
   let sessionId = '';
+  // Local mirror of message history (index, role, text)
+  let localHistory = [];
 
   inputEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
   });
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function renderMessages() {
+    if (welcomeVisible) return;
+    messagesEl.innerHTML = '';
+    localHistory.forEach((m, idx) => {
+      const div = document.createElement('div');
+      const uiRole = m.role === 'model' ? 'assistant' : m.role;
+      div.className = 'msg ' + uiRole;
+      div.dataset.idx = idx;
+
+      let inner = '<div class="msg-text">' + escHtml(m.text) + '</div>';
+      if (m.meta) inner += '<div class="meta">' + m.meta + '</div>';
+
+      if (uiRole !== 'system') {
+        inner += '<div class="msg-actions">'
+          + '<button onclick="startEdit(' + idx + ')">Edit</button>'
+          + '<button class="delete" onclick="deleteMsg(' + idx + ')">Delete</button>'
+          + '</div>';
+      }
+
+      div.innerHTML = inner;
+      messagesEl.appendChild(div);
+    });
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
 
   function addMessage(role, content, meta) {
     if (welcomeVisible) {
       messagesEl.innerHTML = '';
       welcomeVisible = false;
     }
-    const div = document.createElement('div');
-    div.className = 'msg ' + role;
+    localHistory.push({ role, text: content, meta: meta || '' });
+    renderMessages();
+  }
 
-    if (role === 'assistant' && meta) {
-      div.innerHTML = content + '<div class="meta">' + meta + '</div>';
-    } else {
-      div.textContent = content;
+  function startEdit(idx) {
+    const msg = localHistory[idx];
+    const el = messagesEl.querySelector('[data-idx="' + idx + '"]');
+    if (!el) return;
+    const textEl = el.querySelector('.msg-text');
+    const actionsEl = el.querySelector('.msg-actions');
+    if (actionsEl) actionsEl.style.display = 'none';
+
+    const editDiv = document.createElement('div');
+    editDiv.className = 'edit-area';
+    editDiv.innerHTML = '<textarea>' + escHtml(msg.text) + '</textarea>'
+      + '<div class="edit-btns">'
+      + '<button class="save-btn" onclick="saveEdit(' + idx + ', this)">Save</button>'
+      + '<button class="cancel-btn" onclick="renderMessages()">Cancel</button>'
+      + '</div>';
+
+    textEl.style.display = 'none';
+    el.appendChild(editDiv);
+    editDiv.querySelector('textarea').focus();
+  }
+
+  async function saveEdit(idx, btn) {
+    const el = messagesEl.querySelector('[data-idx="' + idx + '"]');
+    const newText = el.querySelector('.edit-area textarea').value.trim();
+    if (!newText) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      const res = await fetch('/api/history/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, index: idx, text: newText }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        // Update local: change text and truncate after
+        localHistory[idx].text = newText;
+        localHistory = localHistory.slice(0, idx + 1);
+        renderMessages();
+      }
+    } catch (err) {
+      addMessage('system', 'Edit failed: ' + err.message);
     }
+  }
 
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return div;
+  async function deleteMsg(idx) {
+    try {
+      const res = await fetch('/api/history/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, index: idx }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        localHistory.splice(idx, 1);
+        if (localHistory.length === 0) {
+          welcomeVisible = true;
+          messagesEl.innerHTML = '<div class="welcome"><h2>Welcome</h2><p>Send a message to start chatting.</p></div>';
+        } else {
+          renderMessages();
+        }
+      }
+    } catch (err) {
+      addMessage('system', 'Delete failed: ' + err.message);
+    }
+  }
+
+  async function clearChat() {
+    if (!sessionId) {
+      welcomeVisible = true;
+      localHistory = [];
+      messagesEl.innerHTML = '<div class="welcome"><h2>Welcome</h2><p>Send a message to start chatting.</p></div>';
+      return;
+    }
+    try {
+      await fetch('/api/history/clear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+    } catch {}
+    sessionId = '';
+    localHistory = [];
+    msgCount = 0; totalTokens = 0; totalLatency = 0;
+    welcomeVisible = true;
+    messagesEl.innerHTML = '<div class="welcome"><h2>Welcome</h2><p>Send a message to start chatting.</p></div>';
+    document.getElementById('statMessages').textContent = '0';
+    document.getElementById('statTokens').textContent = '0';
+    document.getElementById('statLatency').textContent = '--';
   }
 
   function showTyping() {
@@ -437,16 +649,25 @@ HTML_PAGE = """<!DOCTYPE html>
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, model: modelSelect.value, session_id: sessionId }),
+        body: JSON.stringify({
+          message: text,
+          model: modelSelect.value,
+          session_id: sessionId,
+          system: systemPromptEl.value.trim() || 'You are a helpful AI assistant.',
+        }),
       });
       const data = await res.json();
       removeTyping();
 
       const tokens = (data.input_tokens || 0) + (data.output_tokens || 0);
       const latency = data.latency_ms || 0;
-      const meta = data.model + ' &middot; ' + tokens + ' tokens &middot; ' + latency.toFixed(0) + 'ms';
+      let meta = data.model + ' &middot; ' + tokens + ' tokens &middot; ' + latency.toFixed(0) + 'ms';
+      if (data.tool_calls && data.tool_calls.length > 0) {
+        const toolInfo = data.tool_calls.map(tc => tc.tool + ': "' + tc.query + '"').join(', ');
+        meta += ' &middot; searched: ' + toolInfo;
+      }
 
-      addMessage('assistant', data.reply, meta);
+      addMessage('model', data.reply, meta);
 
       if (data.session_id) sessionId = data.session_id;
       msgCount++;

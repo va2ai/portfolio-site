@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     google_api_key: str = ""
     gemini_api_key: str = ""
 
+    # Tools
+    tavily_api_key: str = ""
+
     # Vector DB
     pgvector_connection: str = ""
 
