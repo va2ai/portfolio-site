@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hybrid Architecture Demo — Chris Combs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* Back link */
+    .back-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(7, 8, 13, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1c1f2e;
+    }
+    .back-nav a {
+      font-family: 'Fira Code', monospace; font-size: 11px;
+      color: #7FE5C2; text-decoration: none;
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .back-nav a:hover { text-decoration: underline; }
+    .back-nav .title {
+      font-family: 'Fira Code', monospace; font-size: 9px;
+      color: #555d6f; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    #demo-root { padding-top: 48px; }
+  </style>
+</head>
+<body style="margin: 0; background: #07080d;">
+
+  <!-- Back to portfolio -->
+  <nav class="back-nav">
+    <a href="/">&larr; Back to Portfolio</a>
+    <span class="title">Hybrid Architecture Demo</span>
+  </nav>
+
+  <div id="demo-root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    const SCENARIOS = [
+      {
+        id: "margin",
+        label: "Profit Margin",
+        question: "What's my profit margin for March?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          revenue: 48750.00,
+          cogs: 31200.00,
+          operating_expenses: 8900.00,
+          returns: 2150.00,
+          net_income: null,
+          profit_margin: null,
+        },
+      },
+      {
+        id: "cac",
+        label: "Customer Acq. Cost",
+        question: "What's my customer acquisition cost this month?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          ad_spend: 4200.00,
+          marketing_other: 1800.00,
+          new_customers: 145,
+          total_customers: 892,
+          cac: null,
+        },
+      },
+      {
+        id: "trend",
+        label: "Revenue Trend",
+        question: "Is my revenue trending up or down?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          revenue: 48750.00,
+          prior_periods: null,
+          yoy_growth: null,
+        },
+      },
+    ];
+
+    function computeDerivedFields(payload) {
+      const computed = { ...payload };
+      const steps = [];
+
+      if ("revenue" in payload && "cogs" in payload && "operating_expenses" in payload && "returns" in payload && payload.net_income === null) {
+        const net = payload.revenue - payload.cogs - payload.operating_expenses - payload.returns;
+        computed.net_income = Math.round(net * 100) / 100;
+        steps.push({
+          type: "calculate",
+          label: "Net Income",
+          code: `${payload.revenue} − ${payload.cogs} − ${payload.operating_expenses} − ${payload.returns}`,
+          result: `$${computed.net_income.toLocaleString()}`,
+        });
+        if (payload.profit_margin === null && payload.revenue > 0) {
+          computed.profit_margin = Math.round((computed.net_income / payload.revenue) * 10000) / 100;
+          steps.push({
+            type: "calculate",
+            label: "Profit Margin",
+            code: `(${computed.net_income} / ${payload.revenue}) × 100`,
+            result: `${computed.profit_margin}%`,
+          });
+        }
+      }
+
+      if ("ad_spend" in payload && "marketing_other" in payload && "new_customers" in payload && payload.cac === null) {
+        const totalMktg = payload.ad_spend + payload.marketing_other;
+        computed.cac = Math.round((totalMktg / payload.new_customers) * 100) / 100;
+        steps.push({
+          type: "calculate",
+          label: "Total Marketing",
+          code: `${payload.ad_spend} + ${payload.marketing_other}`,
+          result: `$${totalMktg.toLocaleString()}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "CAC",
+          code: `${totalMktg} / ${payload.new_customers}`,
+          result: `$${computed.cac}`,
+        });
+      }
+
+      const nullsRemaining = Object.entries(computed).filter(([, v]) => v === null).map(([k]) => k);
+      if (nullsRemaining.length > 0) {
+        steps.push({
+          type: "guard",
+          label: "Missing Data",
+          code: `Null after computation: ${nullsRemaining.join(", ")}`,
+          result: "Declare unavailable to LLM",
+        });
+      }
+
+      return { computed, steps };
+    }
+
+    async function callClaude(apiKey, systemPrompt, userMessage) {
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 600,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userMessage }],
+        }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error?.message || `API ${resp.status}: ${resp.statusText}`);
+      }
+      const data = await resp.json();
+      return data.content?.map(b => b.text || "").join("") || "No response content";
+    }
+
+    function Dots() {
+      const [d, setD] = useState("");
+      useEffect(() => {
+        const iv = setInterval(() => setD(p => p.length >= 3 ? "" : p + "."), 350);
+        return () => clearInterval(iv);
+      }, []);
+      return <span style={{ color: "#555", fontFamily: "var(--mono)" }}>thinking{d}</span>;
+    }
+
+    function StepLog({ steps, visible }) {
+      const icons = { validate: "\u{1F50D}", calculate: "\u{1F9EE}", guard: "\u{1F6E1}\uFE0F" };
+      const colors = { validate: "#3b82f6", calculate: "#10b981", guard: "#f59e0b" };
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          {steps.map((s, i) => (
+            <div key={i} style={{
+              opacity: i < visible ? 1 : 0,
+              transform: i < visible ? "translateY(0)" : "translateY(6px)",
+              transition: "all 0.25s ease",
+              borderLeft: `3px solid ${colors[s.type]}`,
+              background: `${colors[s.type]}08`,
+              borderRadius: "0 5px 5px 0",
+              padding: "6px 9px",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 12 }}>{icons[s.type]}</span>
+                <strong style={{ fontSize: 10, color: colors[s.type], fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  {s.label}
+                </strong>
+                <span style={{ fontSize: 11, color: "#6ee7b7", fontFamily: "var(--mono)", marginLeft: "auto", fontWeight: 500 }}>
+                  {s.result}
+                </span>
+              </div>
+              <code style={{ fontSize: 10, color: "#6b7280", fontFamily: "var(--mono)", display: "block", marginTop: 1 }}>
+                {s.code}
+              </code>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function HybridDemo() {
+      const [apiKey, setApiKey] = useState("");
+      const [keySubmitted, setKeySubmitted] = useState(false);
+      const [activeIdx, setActiveIdx] = useState(0);
+      const [phase, setPhase] = useState("idle");
+      const [promptResult, setPromptResult] = useState("");
+      const [hybridResult, setHybridResult] = useState("");
+      const [computeSteps, setComputeSteps] = useState([]);
+      const [visibleSteps, setVisibleSteps] = useState(0);
+      const [showPayload, setShowPayload] = useState(false);
+      const [error, setError] = useState(null);
+      const [showKey, setShowKey] = useState(false);
+
+      const scenario = SCENARIOS[activeIdx];
+
+      const reset = () => {
+        setPhase("idle");
+        setPromptResult("");
+        setHybridResult("");
+        setComputeSteps([]);
+        setVisibleSteps(0);
+        setError(null);
+      };
+
+      useEffect(() => { reset(); setShowPayload(false); }, [activeIdx]);
+
+      const runDemo = useCallback(async () => {
+        reset();
+        setPhase("running");
+        try {
+          const naiveSystem = `You are a financial analytics assistant for an ecommerce platform. Answer the seller's question using the JSON data provided. Be helpful, give specific numbers, and provide context like comparisons, benchmarks, or recommendations where you can.`;
+          const naiveUser = `Seller question: "${scenario.question}"\n\nSeller data (JSON from platform API):\n${JSON.stringify(scenario.payload, null, 2)}`;
+          const naivePromise = callClaude(apiKey, naiveSystem, naiveUser);
+
+          const { computed, steps } = computeDerivedFields(scenario.payload);
+          setComputeSteps(steps);
+          for (let i = 1; i <= steps.length; i++) {
+            await new Promise(r => setTimeout(r, 450));
+            setVisibleSteps(i);
+          }
+          await new Promise(r => setTimeout(r, 250));
+
+          const nullsRemaining = Object.entries(computed).filter(([, v]) => v === null).map(([k]) => k);
+          const hybridSystem = `You are a financial analytics assistant. STRICT RULES:
+1. All numbers are PRE-COMPUTED below. NEVER calculate, estimate, or infer any number yourself.
+2. Fields listed as UNAVAILABLE have no data. Say "this data is not available" — do NOT guess or use training knowledge.
+3. Do NOT reference industry benchmarks, historical averages, or external comparisons unless explicitly provided.
+4. Do NOT make projections, forecasts, or trend claims unless multi-period data is provided.
+5. Under 80 words. State facts, cite the pre-computed numbers, note what's missing.`;
+
+          const hybridUser = `Seller question: "${scenario.question}"
+
+PRE-COMPUTED DATA (use these numbers verbatim):
+${JSON.stringify(computed, null, 2)}
+
+UNAVAILABLE FIELDS (do not guess): ${nullsRemaining.length > 0 ? nullsRemaining.join(", ") : "none"}
+
+Answer using ONLY the pre-computed data.`;
+
+          const hybridPromise = callClaude(apiKey, hybridSystem, hybridUser);
+
+          const [naiveResp, hybridResp] = await Promise.all([naivePromise, hybridPromise]);
+          setPromptResult(naiveResp);
+          setHybridResult(hybridResp);
+          setPhase("done");
+        } catch (e) {
+          setError(e.message);
+          setPhase("error");
+        }
+      }, [scenario, apiKey]);
+
+      const cssVars = {
+        "--mono": "'Fira Code', 'SF Mono', 'Consolas', monospace",
+        "--sans": "'Libre Franklin', 'Helvetica Neue', sans-serif",
+        "--display": "'Playfair Display', 'Georgia', serif",
+      };
+
+      // API Key Entry
+      if (!keySubmitted) {
+        return (
+          <div style={{
+            ...cssVars,
+            minHeight: "100vh",
+            background: "#07080d",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "var(--sans)",
+            padding: 20,
+          }}>
+            <div style={{
+              width: "100%", maxWidth: 460,
+              background: "#0d0e16", border: "1px solid #1c1f2e",
+              borderRadius: 14, padding: "32px 28px",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 18 }}>
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#f43f5e", boxShadow: "0 0 10px #f43f5e55" }} />
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b98155" }} />
+                <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f", letterSpacing: "0.1em", textTransform: "uppercase", marginLeft: 3 }}>
+                  Hybrid Architecture Demo
+                </span>
+              </div>
+
+              <h1 style={{
+                fontFamily: "var(--display)", fontSize: 26, fontWeight: 700,
+                color: "#f4f5f7", margin: "0 0 6px", lineHeight: 1.15,
+              }}>
+                Prompt-Only <span style={{ color: "#555d6f", fontWeight: 400 }}>vs</span> Hybrid System
+              </h1>
+              <p style={{ fontSize: 13, color: "#6b7280", lineHeight: 1.5, margin: "0 0 22px" }}>
+                Real Claude API calls showing the difference between sending raw financial
+                data to an LLM versus pre-validating and computing first.
+              </p>
+
+              <label style={{
+                display: "block", fontSize: 9, fontFamily: "var(--mono)",
+                color: "#555d6f", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5,
+              }}>
+                Anthropic API Key
+              </label>
+              <div style={{ position: "relative", marginBottom: 14 }}>
+                <input
+                  type={showKey ? "text" : "password"}
+                  value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && apiKey.startsWith("sk-")) setKeySubmitted(true); }}
+                  placeholder="sk-ant-api03-..."
+                  spellCheck={false}
+                  autoComplete="off"
+                  style={{
+                    width: "100%", padding: "9px 64px 9px 12px",
+                    background: "#0a0b11", border: "1px solid #1c1f2e",
+                    borderRadius: 7, color: "#dfe2ea", fontSize: 13,
+                    fontFamily: "var(--mono)", outline: "none", boxSizing: "border-box",
+                  }}
+                  onFocus={e => e.target.style.borderColor = "#3b82f6"}
+                  onBlur={e => e.target.style.borderColor = "#1c1f2e"}
+                />
+                <button onClick={() => setShowKey(s => !s)} style={{
+                  position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", color: "#555d6f",
+                  fontSize: 10, fontFamily: "var(--mono)", cursor: "pointer", padding: "2px 5px",
+                }}>
+                  {showKey ? "hide" : "show"}
+                </button>
+              </div>
+
+              <button
+                onClick={() => setKeySubmitted(true)}
+                disabled={!apiKey.startsWith("sk-")}
+                style={{
+                  width: "100%", padding: "10px 0", borderRadius: 7, border: "none",
+                  background: apiKey.startsWith("sk-") ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#1c1f2e",
+                  color: apiKey.startsWith("sk-") ? "#fff" : "#555",
+                  fontSize: 13, fontWeight: 600,
+                  cursor: apiKey.startsWith("sk-") ? "pointer" : "not-allowed",
+                  fontFamily: "var(--sans)",
+                  boxShadow: apiKey.startsWith("sk-") ? "0 2px 14px rgba(59,130,246,0.2)" : "none",
+                }}
+              >
+                Launch Demo &rarr;
+              </button>
+
+              <div style={{
+                marginTop: 14, padding: "9px 11px",
+                background: "#0a0b11", borderRadius: 6, border: "1px solid #1c1f2e",
+              }}>
+                <div style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Security
+                </div>
+                <div style={{ fontSize: 10, color: "#4b5563", lineHeight: 1.4 }}>
+                  Key is held in React state only — not saved to localStorage, cookies, or any backend.
+                  Each run makes 2 API calls (~1,200 tokens, ~$0.01). View source to verify.
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Main Demo
+      return (
+        <div style={{
+          ...cssVars,
+          minHeight: "100vh", background: "#07080d",
+          color: "#dfe2ea", fontFamily: "var(--sans)", padding: "22px 16px",
+        }}>
+          {/* Header */}
+          <div style={{ maxWidth: 1120, margin: "0 auto 18px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b98155" }} />
+                  <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                    Live &middot; Real Claude Sonnet Calls
+                  </span>
+                </div>
+                <h1 style={{ fontFamily: "var(--display)", fontSize: "clamp(22px,3.2vw,34px)", fontWeight: 700, color: "#f4f5f7", margin: 0, lineHeight: 1.1 }}>
+                  Prompt-Only <span style={{ color: "#555d6f", fontWeight: 400 }}>vs</span> Hybrid System
+                </h1>
+              </div>
+              <button onClick={() => { setKeySubmitted(false); reset(); }} style={{
+                padding: "4px 10px", borderRadius: 5, border: "1px solid #1c1f2e",
+                background: "transparent", color: "#555d6f", fontSize: 9,
+                fontFamily: "var(--mono)", cursor: "pointer",
+              }}>
+                Change Key
+              </button>
+            </div>
+            <p style={{ fontSize: 12, color: "#6b7280", marginTop: 4, maxWidth: 580, lineHeight: 1.5 }}>
+              Both sides call Claude with the same question and JSON payload.
+              Left sends it raw. Right validates, computes, and constrains first.
+            </p>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ maxWidth: 1120, margin: "0 auto 10px", display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {SCENARIOS.map((s, i) => (
+              <button key={s.id} onClick={() => setActiveIdx(i)} style={{
+                padding: "5px 14px", borderRadius: 5,
+                border: activeIdx === i ? "1px solid #6366f1" : "1px solid #1c1f2e",
+                background: activeIdx === i ? "#6366f110" : "#0d0e16",
+                color: activeIdx === i ? "#a5b4fc" : "#555d6f",
+                fontSize: 11, fontWeight: 500, cursor: "pointer",
+                fontFamily: "var(--sans)", transition: "all 0.15s",
+              }}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Query */}
+          <div style={{ maxWidth: 1120, margin: "0 auto 12px" }}>
+            <div style={{
+              background: "#0d0e16", border: "1px solid #1c1f2e", borderRadius: 9,
+              padding: "11px 14px",
+              display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
+            }}>
+              <div>
+                <div style={{ fontSize: 9, color: "#555d6f", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>
+                  Seller asks:
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#f4f5f7" }}>"{scenario.question}"</div>
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button onClick={() => setShowPayload(p => !p)} style={{
+                  padding: "4px 10px", borderRadius: 4, border: "1px solid #1c1f2e",
+                  background: showPayload ? "#6366f108" : "transparent",
+                  color: showPayload ? "#a5b4fc" : "#555d6f",
+                  fontSize: 10, cursor: "pointer", fontFamily: "var(--mono)",
+                }}>
+                  {showPayload ? "Hide" : "View"} JSON
+                </button>
+                <button onClick={runDemo} disabled={phase === "running"} style={{
+                  padding: "4px 16px", borderRadius: 4, border: "none",
+                  background: phase === "running" ? "#1c1f2e" : "#f43f5e",
+                  color: phase === "running" ? "#555" : "#fff",
+                  fontSize: 11, fontWeight: 600,
+                  cursor: phase === "running" ? "wait" : "pointer",
+                  fontFamily: "var(--sans)",
+                  boxShadow: phase !== "running" ? "0 2px 10px #f43f5e44" : "none",
+                }}>
+                  {phase === "idle" ? "\u25B6 Call Claude" : phase === "running" ? "\u23F3 Calling..." : "\u21BB Run Again"}
+                </button>
+              </div>
+            </div>
+            {showPayload && (
+              <pre style={{
+                marginTop: 5, background: "#0a0b11", borderRadius: 6, padding: 10,
+                fontSize: 10, color: "#6b7280", fontFamily: "var(--mono)",
+                border: "1px solid #1c1f2e", overflow: "auto",
+              }}>
+                {JSON.stringify(scenario.payload, null, 2)}
+              </pre>
+            )}
+          </div>
+
+          {/* Results */}
+          {phase !== "idle" && (
+            <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {/* LEFT — Prompt-Only */}
+              <div style={{
+                background: "#0d0e16", border: "1px solid #2a1520",
+                borderTop: "3px solid #f43f5e", borderRadius: 9, padding: 14,
+                display: "flex", flexDirection: "column",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#f43f5e" }} />
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#f43f5e", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Prompt-Only
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: 9, color: "#5a3a3a", fontFamily: "var(--mono)",
+                  padding: "3px 6px", background: "#f43f5e06", borderRadius: 3,
+                  border: "1px solid #f43f5e10", marginBottom: 8,
+                }}>
+                  "Be helpful, give specific numbers, provide benchmarks &amp; recommendations"
+                </div>
+                <div style={{
+                  flex: 1, fontSize: 13, lineHeight: 1.6, color: "#c8ccd4",
+                  padding: "9px 11px", background: "#0a0b11", borderRadius: 6,
+                  border: "1px solid #1c1f2e", minHeight: 90, whiteSpace: "pre-wrap",
+                }}>
+                  {promptResult || <Dots />}
+                </div>
+                {phase === "done" && (
+                  <div style={{
+                    marginTop: 8, padding: "7px 9px",
+                    background: "#f43f5e08", borderRadius: 5, border: "1px solid #f43f5e12",
+                  }}>
+                    <div style={{ fontSize: 9, fontWeight: 600, color: "#f43f5e", fontFamily: "var(--mono)", marginBottom: 2 }}>
+                      NO VALIDATION LAYER
+                    </div>
+                    <div style={{ fontSize: 10, color: "#8b5a5a", lineHeight: 1.4 }}>
+                      Check: Did it invent benchmarks? Do its own math (possibly wrong)?
+                      Claim trends from one data point? Recommend actions without basis?
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* RIGHT — Hybrid */}
+              <div style={{
+                background: "#0d0e16", border: "1px solid #15281f",
+                borderTop: "3px solid #10b981", borderRadius: 9, padding: 14,
+                display: "flex", flexDirection: "column",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }} />
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#10b981", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Hybrid System
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: 9, color: "#3a5a4a", fontFamily: "var(--mono)",
+                  padding: "3px 6px", background: "#10b98106", borderRadius: 3,
+                  border: "1px solid #10b98110", marginBottom: 8,
+                }}>
+                  validate &rarr; compute (deterministic JS) &rarr; guard nulls &rarr; constrained generate
+                </div>
+
+                {computeSteps.length > 0 && (
+                  <div style={{ marginBottom: 7 }}>
+                    <div style={{ fontSize: 9, color: "#555d6f", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
+                      Pre-LLM Pipeline:
+                    </div>
+                    <StepLog steps={computeSteps} visible={visibleSteps} />
+                  </div>
+                )}
+
+                {(visibleSteps >= computeSteps.length || phase === "done") && (
+                  <div style={{
+                    flex: 1, fontSize: 13, lineHeight: 1.6, color: "#c8ccd4",
+                    padding: "9px 11px", background: "#0a0b11", borderRadius: 6,
+                    border: "1px solid #1c1f2e", minHeight: 50, whiteSpace: "pre-wrap",
+                  }}>
+                    {hybridResult || <Dots />}
+                  </div>
+                )}
+
+                {phase === "done" && (
+                  <div style={{
+                    marginTop: 8, padding: "7px 9px",
+                    background: "#10b98108", borderRadius: 5, border: "1px solid #10b98112",
+                  }}>
+                    <div style={{ fontSize: 9, fontWeight: 600, color: "#10b981", fontFamily: "var(--mono)", marginBottom: 2 }}>
+                      MATH BY CODE &middot; SCOPE ENFORCED &middot; NULLS DECLARED
+                    </div>
+                    <div style={{ fontSize: 10, color: "#5a8b6a", lineHeight: 1.4 }}>
+                      Numbers computed in JavaScript before the LLM ran. Null fields declared
+                      unavailable. LLM wrote language around pre-verified facts only.
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div style={{
+              maxWidth: 1120, margin: "12px auto", padding: "9px 12px",
+              background: "#1a0a0a", border: "1px solid #5a1a1a", borderRadius: 6,
+              color: "#f87171", fontSize: 11, fontFamily: "var(--mono)",
+            }}>
+              Error: {error}
+              <button onClick={reset} style={{
+                marginLeft: 10, padding: "2px 8px", borderRadius: 3,
+                border: "1px solid #5a1a1a", background: "transparent",
+                color: "#f87171", fontSize: 10, cursor: "pointer", fontFamily: "var(--mono)",
+              }}>
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Architecture */}
+          <div style={{ maxWidth: 1120, margin: "20px auto 0" }}>
+            <div style={{ background: "#0d0e16", border: "1px solid #1c1f2e", borderRadius: 9, padding: "16px 18px" }}>
+              <h3 style={{ fontFamily: "var(--display)", fontSize: 16, fontWeight: 700, color: "#f4f5f7", margin: "0 0 10px" }}>
+                The Architecture
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 7 }}>
+                {[
+                  { icon: "\u{1F4E5}", t: "Validate", d: "Detect nulls and missing fields before the LLM sees anything.", c: "#3b82f6" },
+                  { icon: "\u{1F9EE}", t: "Compute", d: "All math in deterministic code. LLMs reason in tokens, not numbers.", c: "#10b981" },
+                  { icon: "\u{1F6E1}\uFE0F", t: "Guard", d: "If data can't answer the question, declare it before generation.", c: "#f59e0b" },
+                  { icon: "\u{1F4AC}", t: "Generate", d: "LLM writes language around verified facts. Reasoning, not fabrication.", c: "#8b5cf6" },
+                ].map(s => (
+                  <div key={s.t} style={{
+                    padding: "10px 9px", background: `${s.c}05`,
+                    border: `1px solid ${s.c}12`, borderTop: `2px solid ${s.c}`,
+                    borderRadius: "0 0 6px 6px",
+                  }}>
+                    <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
+                    <div style={{ fontWeight: 600, fontSize: 10, color: s.c, fontFamily: "var(--mono)", marginBottom: 2 }}>{s.t}</div>
+                    <div style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.4 }}>{s.d}</div>
+                  </div>
+                ))}
+              </div>
+              <p style={{
+                marginTop: 10, padding: "8px 11px",
+                background: "#0a0b11", borderRadius: 5, border: "1px solid #1c1f2e",
+                fontSize: 12, color: "#6b7280", lineHeight: 1.5, fontStyle: "italic",
+              }}>
+                The fix isn't better prompting alone. It's a systems approach — let the LLM handle
+                reasoning and natural language, but route all calculations and data lookups through
+                validated code paths. Make hallucinations structurally impossible, not just less likely.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ maxWidth: 1120, margin: "12px auto 0", textAlign: "center" }}>
+            <span style={{ fontSize: 9, color: "#1e2030", fontFamily: "var(--mono)" }}>
+              chris combs &middot; github.com/va2ai &middot; real claude sonnet calls, not simulated
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('demo-root'));
+    root.render(<HybridDemo />);
+  </script>
+</body>
+</html>

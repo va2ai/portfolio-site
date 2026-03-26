@@ -6,10 +6,14 @@ from fastapi.responses import FileResponse
 
 router = APIRouter()
 
-# Path to the static index.html
-UI_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "static", "index.html")
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "static")
 
 
 @router.get("/", response_class=FileResponse)
 async def index():
-    return FileResponse(UI_FILE_PATH)
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+
+
+@router.get("/demo", response_class=FileResponse)
+async def demo():
+    return FileResponse(os.path.join(STATIC_DIR, "demo.html"))
