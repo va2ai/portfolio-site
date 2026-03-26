@@ -233,9 +233,16 @@ section { position: relative; padding: 100px 24px; max-width: 1120px; margin: 0 
 .contact-section a { color: var(--accent-emerald); text-decoration: none; font-weight: 600; }
 .contact-section a:hover { text-decoration: underline; }
 
-/* Chat FAB */
+/* ElevenLabs Voice Widget */
+elevenlabs-convai {
+  --elevenlabs-convai-primary-color: #7FE5C2;
+  --elevenlabs-convai-bg-color: #0a0b11;
+  --elevenlabs-convai-text-color: #e2e8f0;
+}
+
+/* Chat FAB — offset above ElevenLabs widget */
 .chat-toggle {
-  position: fixed; bottom: 32px; right: 32px; z-index: 200;
+  position: fixed; bottom: 108px; right: 32px; z-index: 200;
   width: 64px; height: 64px; border-radius: 20px;
   background: var(--accent-emerald); border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
