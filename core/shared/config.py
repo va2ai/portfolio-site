@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     google_api_key: str = ""
     gemini_api_key: str = ""
 
+    # ElevenLabs
+    elevenlabs_agent_id: str = ""
+
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"

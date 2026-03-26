@@ -41,6 +41,7 @@ def create_app() -> FastAPI:
     from .routes.health import router as health_router
     from .routes.agents import router as agents_router
     from .routes.chat import router as chat_router
+    from .routes.leads import router as leads_router
     from .routes.ui import router as ui_router
 
     app.mount("/static", StaticFiles(directory="apps/api/static"), name="static")
@@ -48,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(agents_router, prefix="/api")
     app.include_router(chat_router, prefix="/api")
+    app.include_router(leads_router, prefix="/api")
     app.include_router(ui_router)
 
     return app
