@@ -238,6 +238,24 @@ elevenlabs-convai {
   --elevenlabs-convai-primary-color: #7FE5C2;
   --elevenlabs-convai-bg-color: #0a0b11;
   --elevenlabs-convai-text-color: #e2e8f0;
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 200;
+}
+
+elevenlabs-convai::part(widget) {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--accent-emerald);
+  box-shadow: 0 10px 30px var(--accent-emerald-glow);
+  transition: all 0.4s var(--ease);
+}
+
+elevenlabs-convai::part(widget):hover {
+  transform: translateY(-5px) rotate(5deg);
+  box-shadow: 0 15px 40px var(--accent-emerald-glow);
 }
 
 /* Chat FAB — offset above ElevenLabs widget */
