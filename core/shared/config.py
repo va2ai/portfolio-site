@@ -25,6 +25,9 @@ class Settings(BaseSettings):
 
     # Tools
     tavily_api_key: str = ""
+    exa_api_key: str = ""
+    reddit_client_id: str = ""
+    reddit_client_secret: str = ""
 
     # Vector DB
     pgvector_connection: str = ""

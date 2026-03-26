@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
@@ -20,11 +21,26 @@ async def lifespan(app: FastAPI):
     from core.tools.builtins.web_search import WebSearchTool
     from core.tools.builtins.calculator import CalculatorTool
     from core.tools.builtins.tavily_search import TavilySearchTool
+    from core.tools.builtins.exa_search import ExaSearchTool
+    from core.tools.builtins.reddit_search import RedditSearchTool, RedditReadPostTool, RedditSubredditTool
 
     tool_registry.register(WebSearchTool())
     tool_registry.register(CalculatorTool())
     tool_registry.register(TavilySearchTool())
+    tool_registry.register(ExaSearchTool())
+    tool_registry.register(RedditSearchTool())
+    tool_registry.register(RedditReadPostTool())
+    tool_registry.register(RedditSubredditTool())
     logger.info(f"Registered tools: {tool_registry.tool_names}")
+
+    # Register built-in agents
+    from core.agents.registry import agent_registry
+    from core.agents.builtins.research_agent import research_agent
+    from core.agents.builtins.reddit_agent import reddit_agent
+
+    agent_registry.register(research_agent)
+    agent_registry.register(reddit_agent)
+    logger.info(f"Registered agents: {[a['name'] for a in agent_registry.list_agents()]}")
 
     yield
     logger.info("Shutting down...")
@@ -49,6 +65,8 @@ def create_app() -> FastAPI:
     from .routes.chat import router as chat_router
     from .routes.search import router as search_router
     from .routes.ui import router as ui_router
+
+    app.mount("/static", StaticFiles(directory="apps/api/static"), name="static")
 
     app.include_router(health_router)
     app.include_router(agents_router, prefix="/api")
