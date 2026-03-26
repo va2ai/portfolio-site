@@ -128,7 +128,7 @@ async def clear_session(session_id: str):
 
 # ─── Demo endpoint (Hybrid vs Prompt-Only comparison) ─────────────
 
-NAIVE_MODEL = "gemini-2.5-pro"          # expensive model, no guardrails
+NAIVE_MODEL = "gemini-2.5-flash"        # capable model, no guardrails
 HYBRID_MODEL = "gemini-2.0-flash-lite"  # cheapest model, with hybrid architecture
 
 
@@ -154,16 +154,27 @@ async def demo_compare(req: DemoRequest):
 
     async def call_gemini(model: str, system: str, user: str) -> str:
         try:
+            config = types.GenerateContentConfig(
+                system_instruction=system,
+                temperature=0.7,
+                max_output_tokens=600,
+            )
+            # Minimize thinking for 2.5 Pro (it returns thinking blocks that break .text)
+            if "2.5" in model:
+                config.thinking_config = types.ThinkingConfig(thinking_budget=1024)
+
             response = client.models.generate_content(
                 model=model,
                 contents=[types.Content(role="user", parts=[types.Part.from_text(text=user)])],
-                config=types.GenerateContentConfig(
-                    system_instruction=system,
-                    temperature=0.7,
-                    max_output_tokens=600,
-                ),
+                config=config,
             )
-            return response.text or "No response."
+            # Extract text from all non-thought parts
+            text_parts = []
+            for candidate in (response.candidates or []):
+                for part in (candidate.content.parts or []):
+                    if hasattr(part, "text") and part.text and not getattr(part, "thought", False):
+                        text_parts.append(part.text)
+            return "\n".join(text_parts) or "No response."
         except Exception as e:
             logger.error(f"Demo Gemini error ({model}): {e}", exc_info=True)
             return f"Error: {e}"

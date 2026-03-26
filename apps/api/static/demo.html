@@ -129,6 +129,377 @@
           projected_12mo_revenue: null,
         },
       },
+      {
+        id: "margin_multi",
+        label: "Multi-Product Margin",
+        question: "Which product line is most profitable after shipping and returns?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          products: {
+            widgets: { units_sold: 840, unit_price: 29.99, unit_cost: 12.50, returns: 42, shipping_per_unit: 4.25 },
+            gadgets: { units_sold: 310, unit_price: 89.99, unit_cost: 38.00, returns: 18, shipping_per_unit: 7.50 },
+            accessories: { units_sold: 1520, unit_price: 14.99, unit_cost: 3.20, returns: 91, shipping_per_unit: 2.10 },
+          },
+          product_margins: null,
+          best_product: null,
+          worst_product: null,
+          blended_margin: null,
+        },
+      },
+      {
+        id: "breakeven",
+        label: "Break-Even Point",
+        question: "How many units do I need to sell to break even this month?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          fixed_costs_rent: 3200.00,
+          fixed_costs_salaries: 22400.00,
+          fixed_costs_software: 1850.00,
+          fixed_costs_insurance: 680.00,
+          fixed_costs_other: 1200.00,
+          avg_selling_price: 42.50,
+          avg_variable_cost: 18.75,
+          total_fixed_costs: null,
+          contribution_margin: null,
+          breakeven_units: null,
+          breakeven_revenue: null,
+        },
+      },
+      {
+        id: "inventory",
+        label: "Inventory Health",
+        question: "How many days of inventory do I have? Am I overstocked or understocked?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          current_inventory_value: 87600.00,
+          monthly_cogs: 31200.00,
+          units_in_stock: 2840,
+          avg_daily_unit_sales: 38,
+          lead_time_days: 21,
+          safety_stock_days: 7,
+          days_of_inventory: null,
+          reorder_point: null,
+          overstock_status: null,
+        },
+      },
+      {
+        id: "churn",
+        label: "Churn Impact",
+        question: "How much revenue am I losing to churn? What would reducing it by 2% do?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          total_customers_start: 892,
+          customers_lost: 67,
+          avg_revenue_per_customer: 53.40,
+          monthly_churn_rate: null,
+          annual_churn_rate: null,
+          monthly_revenue_lost: null,
+          annual_revenue_lost: null,
+          revenue_saved_2pct_reduction: null,
+        },
+      },
+      {
+        id: "payback",
+        label: "CAC Payback",
+        question: "How many months does it take to recover my customer acquisition cost?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-Q1",
+          total_acquisition_spend: 22800.00,
+          new_customers: 310,
+          avg_monthly_revenue_per_customer: 17.80,
+          gross_margin_pct: 0.42,
+          cac: null,
+          monthly_gross_profit_per_customer: null,
+          payback_months: null,
+        },
+      },
+      {
+        id: "aov",
+        label: "AOV Analysis",
+        question: "What's my average order value and how does bundling affect it?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          total_orders: 1247,
+          total_revenue: 48750.00,
+          single_item_orders: 823,
+          single_item_revenue: 24690.00,
+          multi_item_orders: 424,
+          multi_item_revenue: 24060.00,
+          overall_aov: null,
+          single_item_aov: null,
+          multi_item_aov: null,
+          bundle_lift_pct: null,
+        },
+      },
+      {
+        id: "gross_net",
+        label: "Gross vs Net Revenue",
+        question: "What's my real revenue after discounts, returns, and chargebacks?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          gross_revenue: 52400.00,
+          discounts: 2180.00,
+          returns: 1470.00,
+          chargebacks: 312.00,
+          shipping_collected: 3850.00,
+          shipping_paid: 4210.00,
+          net_revenue: null,
+          discount_rate: null,
+          return_rate: null,
+          shipping_loss: null,
+        },
+      },
+      {
+        id: "conversion",
+        label: "Funnel Conversion",
+        question: "Where are we losing the most customers in the funnel?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          visitors: 48200,
+          product_views: 18400,
+          add_to_cart: 4120,
+          checkout_started: 2280,
+          orders_completed: 1247,
+          browse_to_view_rate: null,
+          view_to_cart_rate: null,
+          cart_to_checkout_rate: null,
+          checkout_to_purchase_rate: null,
+          overall_conversion_rate: null,
+          biggest_dropoff: null,
+        },
+      },
+      {
+        id: "shipping_cost",
+        label: "Shipping Efficiency",
+        question: "What's my true shipping cost per order and am I charging enough?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          total_orders_shipped: 1198,
+          carrier_costs: 4210.00,
+          packaging_materials: 890.00,
+          warehouse_labor_shipping: 2400.00,
+          free_shipping_orders: 743,
+          paid_shipping_orders: 455,
+          shipping_revenue_collected: 3850.00,
+          true_cost_per_order: null,
+          shipping_deficit: null,
+          free_shipping_subsidy: null,
+        },
+      },
+      {
+        id: "refund",
+        label: "Refund Analysis",
+        question: "What are refunds really costing me when I include processing fees?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          total_refunds: 89,
+          refund_amount: 4730.00,
+          original_payment_processing_fee_pct: 0.029,
+          original_payment_fixed_fee: 0.30,
+          restocking_labor_per_unit: 3.50,
+          unsellable_pct: 0.12,
+          avg_item_cost: 18.75,
+          total_refund_cost: null,
+          lost_processing_fees: null,
+          restocking_cost: null,
+          unsellable_loss: null,
+          true_cost_per_refund: null,
+        },
+      },
+      {
+        id: "email_roi",
+        label: "Email Campaign ROI",
+        question: "What's the ROI on my email campaigns including all costs?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          emails_sent: 28400,
+          opens: 7100,
+          clicks: 1420,
+          conversions: 204,
+          email_revenue: 19200.00,
+          esp_cost: 149.00,
+          copywriter_cost: 800.00,
+          design_cost: 400.00,
+          open_rate: null,
+          click_rate: null,
+          conversion_rate: null,
+          total_cost: null,
+          roi_pct: null,
+          revenue_per_email: null,
+        },
+      },
+      {
+        id: "discount",
+        label: "Discount Impact",
+        question: "Did my 20% off sale actually make more money or did it just cannibalize full-price sales?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          normal_daily_orders: 42,
+          normal_aov: 39.10,
+          sale_days: 5,
+          sale_orders_per_day: 78,
+          sale_aov: 34.20,
+          discount_pct: 0.20,
+          normal_margin_pct: 0.42,
+          sale_revenue: null,
+          counterfactual_revenue: null,
+          incremental_revenue: null,
+          sale_gross_profit: null,
+          counterfactual_gross_profit: null,
+          net_profit_impact: null,
+        },
+      },
+      {
+        id: "warehouse",
+        label: "Warehouse Efficiency",
+        question: "What does it cost me to fulfill each order and where's the waste?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          total_orders_fulfilled: 1198,
+          warehouse_rent: 3200.00,
+          warehouse_utilities: 480.00,
+          warehouse_labor: 8200.00,
+          packaging_materials: 890.00,
+          equipment_depreciation: 340.00,
+          picking_errors: 23,
+          error_reshipment_cost: 12.50,
+          cost_per_order: null,
+          error_rate: null,
+          total_error_cost: null,
+          labor_cost_per_order: null,
+        },
+      },
+      {
+        id: "payment",
+        label: "Payment Processing",
+        question: "How much am I actually paying in payment processing across all methods?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          credit_card_volume: 32100.00,
+          credit_card_txns: 812,
+          cc_rate: 0.029,
+          cc_fixed: 0.30,
+          paypal_volume: 11200.00,
+          paypal_txns: 298,
+          paypal_rate: 0.0349,
+          paypal_fixed: 0.49,
+          bnpl_volume: 5450.00,
+          bnpl_txns: 137,
+          bnpl_rate: 0.055,
+          bnpl_fixed: 0.00,
+          total_processing_fees: null,
+          effective_rate: null,
+          cost_per_transaction: null,
+        },
+      },
+      {
+        id: "tax_liability",
+        label: "Sales Tax Estimate",
+        question: "What's my estimated sales tax liability across states?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-Q1",
+          states: {
+            CA: { taxable_sales: 18200.00, rate: 0.0725 },
+            TX: { taxable_sales: 12400.00, rate: 0.0625 },
+            NY: { taxable_sales: 8900.00, rate: 0.08 },
+            FL: { taxable_sales: 6100.00, rate: 0.06 },
+            WA: { taxable_sales: 3150.00, rate: 0.065 },
+          },
+          state_liabilities: null,
+          total_liability: null,
+          effective_rate: null,
+        },
+      },
+      {
+        id: "cogs_breakdown",
+        label: "COGS Breakdown",
+        question: "What's my true cost of goods sold including landed cost?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          raw_product_cost: 24800.00,
+          inbound_freight: 2100.00,
+          customs_duties: 1480.00,
+          quality_inspection: 320.00,
+          shrinkage_pct: 0.018,
+          units_purchased: 3200,
+          landed_cost_per_unit: null,
+          total_cogs: null,
+          shrinkage_cost: null,
+        },
+      },
+      {
+        id: "subscription",
+        label: "Subscription Metrics",
+        question: "How healthy is my subscription business? What's MRR and growth?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          active_subscribers_start: 412,
+          new_subscribers: 58,
+          churned_subscribers: 31,
+          upgraded_subscribers: 12,
+          downgraded_subscribers: 7,
+          avg_subscription_price: 24.99,
+          upgrade_avg_increase: 15.00,
+          downgrade_avg_decrease: 10.00,
+          active_subscribers_end: null,
+          mrr: null,
+          net_new_mrr: null,
+          expansion_mrr: null,
+          contraction_mrr: null,
+          churn_mrr: null,
+        },
+      },
+      {
+        id: "ad_efficiency",
+        label: "Ad Spend Efficiency",
+        question: "What's my effective cost per acquisition factoring in attribution decay?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          total_ad_spend: 11200.00,
+          last_click_conversions: 262,
+          assisted_conversions: 148,
+          view_through_conversions: 89,
+          attribution_weights: { last_click: 1.0, assisted: 0.5, view_through: 0.15 },
+          weighted_conversions: null,
+          effective_cpa: null,
+          naive_cpa: null,
+        },
+      },
+      {
+        id: "seasonal",
+        label: "Seasonal Adjustment",
+        question: "Is my growth real or just seasonal? What's the deseasonalized trend?",
+        payload: {
+          seller_id: "SLR-4821",
+          current_month: "2026-03",
+          current_revenue: 48750.00,
+          prior_year_same_month: 41200.00,
+          prior_year_annual: 465000.00,
+          prior_year_march_share: null,
+          seasonal_index: null,
+          deseasonalized_revenue: null,
+          yoy_growth: null,
+          real_growth_adjusted: null,
+        },
+      },
     ];
 
     function computeDerivedFields(payload) {
@@ -340,7 +711,268 @@
         });
       }
 
-      const nullsRemaining = Object.entries(computed).filter(([k, v]) => v === null && k !== "channels").map(([k]) => k);
+      // ── Multi-Product Margin ──
+      if ("products" in payload && payload.product_margins === null) {
+        const prods = payload.products;
+        const margins = {};
+        Object.keys(prods).forEach(name => {
+          const p = prods[name];
+          const netUnits = p.units_sold - p.returns;
+          const revenue = netUnits * p.unit_price;
+          const cost = netUnits * (p.unit_cost + p.shipping_per_unit);
+          const profit = revenue - cost;
+          const margin = revenue > 0 ? Math.round((profit / revenue) * 10000) / 100 : 0;
+          margins[name] = { net_units: netUnits, revenue: Math.round(revenue * 100) / 100, profit: Math.round(profit * 100) / 100, margin };
+          steps.push({ type: "calculate", label: `${name} margin`, code: `(${netUnits} units × $${p.unit_price} − ${netUnits} × ($${p.unit_cost} + $${p.shipping_per_unit})) / rev`, result: `${margin}%` });
+        });
+        computed.product_margins = margins;
+        const sorted = Object.entries(margins).sort((a, b) => b[1].margin - a[1].margin);
+        computed.best_product = `${sorted[0][0]} (${sorted[0][1].margin}%)`;
+        computed.worst_product = `${sorted[sorted.length-1][0]} (${sorted[sorted.length-1][1].margin}%)`;
+        const totalRev = Object.values(margins).reduce((s, m) => s + m.revenue, 0);
+        const totalProfit = Object.values(margins).reduce((s, m) => s + m.profit, 0);
+        computed.blended_margin = Math.round((totalProfit / totalRev) * 10000) / 100;
+        steps.push({ type: "calculate", label: "Blended margin", code: `$${Math.round(totalProfit).toLocaleString()} / $${Math.round(totalRev).toLocaleString()}`, result: `${computed.blended_margin}%` });
+      }
+
+      // ── Break-Even Point ──
+      if ("fixed_costs_rent" in payload && payload.total_fixed_costs === null) {
+        const fc = payload.fixed_costs_rent + payload.fixed_costs_salaries + payload.fixed_costs_software + payload.fixed_costs_insurance + payload.fixed_costs_other;
+        computed.total_fixed_costs = fc;
+        computed.contribution_margin = Math.round((payload.avg_selling_price - payload.avg_variable_cost) * 100) / 100;
+        computed.breakeven_units = Math.ceil(fc / computed.contribution_margin);
+        computed.breakeven_revenue = Math.round(computed.breakeven_units * payload.avg_selling_price * 100) / 100;
+        steps.push({ type: "calculate", label: "Total fixed costs", code: `rent + salaries + software + insurance + other`, result: `$${fc.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "Contribution margin", code: `$${payload.avg_selling_price} − $${payload.avg_variable_cost}`, result: `$${computed.contribution_margin}` });
+        steps.push({ type: "calculate", label: "Break-even units", code: `$${fc.toLocaleString()} / $${computed.contribution_margin}`, result: `${computed.breakeven_units} units` });
+        steps.push({ type: "calculate", label: "Break-even revenue", code: `${computed.breakeven_units} × $${payload.avg_selling_price}`, result: `$${computed.breakeven_revenue.toLocaleString()}` });
+      }
+
+      // ── Inventory Health ──
+      if ("current_inventory_value" in payload && "avg_daily_unit_sales" in payload && payload.days_of_inventory === null) {
+        computed.days_of_inventory = Math.round(payload.units_in_stock / payload.avg_daily_unit_sales);
+        computed.reorder_point = Math.round(payload.avg_daily_unit_sales * (payload.lead_time_days + payload.safety_stock_days));
+        computed.overstock_status = computed.days_of_inventory > 90 ? "Overstocked" : computed.days_of_inventory < 30 ? "Understocked" : "Healthy";
+        steps.push({ type: "calculate", label: "Days of inventory", code: `${payload.units_in_stock} units / ${payload.avg_daily_unit_sales} daily sales`, result: `${computed.days_of_inventory} days` });
+        steps.push({ type: "calculate", label: "Reorder point", code: `${payload.avg_daily_unit_sales} × (${payload.lead_time_days} lead + ${payload.safety_stock_days} safety)`, result: `${computed.reorder_point} units` });
+        steps.push({ type: "calculate", label: "Stock status", code: `${computed.days_of_inventory} days vs 30-90 healthy range`, result: computed.overstock_status });
+      }
+
+      // ── Churn Impact ──
+      if ("customers_lost" in payload && "total_customers_start" in payload && payload.monthly_churn_rate === null) {
+        computed.monthly_churn_rate = Math.round((payload.customers_lost / payload.total_customers_start) * 10000) / 100;
+        computed.annual_churn_rate = Math.round((1 - Math.pow(1 - payload.customers_lost / payload.total_customers_start, 12)) * 10000) / 100;
+        computed.monthly_revenue_lost = Math.round(payload.customers_lost * payload.avg_revenue_per_customer * 100) / 100;
+        computed.annual_revenue_lost = Math.round(computed.monthly_revenue_lost * 12 * 100) / 100;
+        const reducedChurn = (computed.monthly_churn_rate - 2) / 100;
+        const savedCustomers = Math.round(payload.total_customers_start * 0.02);
+        computed.revenue_saved_2pct_reduction = Math.round(savedCustomers * payload.avg_revenue_per_customer * 12 * 100) / 100;
+        steps.push({ type: "calculate", label: "Monthly churn", code: `${payload.customers_lost} / ${payload.total_customers_start}`, result: `${computed.monthly_churn_rate}%` });
+        steps.push({ type: "calculate", label: "Annual churn", code: `1 − (1 − ${computed.monthly_churn_rate/100})^12`, result: `${computed.annual_churn_rate}%` });
+        steps.push({ type: "calculate", label: "Monthly rev lost", code: `${payload.customers_lost} × $${payload.avg_revenue_per_customer}`, result: `$${computed.monthly_revenue_lost.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "2% reduction saves", code: `${savedCustomers} saved customers × $${payload.avg_revenue_per_customer} × 12 months`, result: `$${computed.revenue_saved_2pct_reduction.toLocaleString()}/yr` });
+      }
+
+      // ── CAC Payback ──
+      if ("total_acquisition_spend" in payload && "new_customers" in payload && "avg_monthly_revenue_per_customer" in payload && payload.cac === null && !("marketing_salaries" in payload)) {
+        computed.cac = Math.round((payload.total_acquisition_spend / payload.new_customers) * 100) / 100;
+        computed.monthly_gross_profit_per_customer = Math.round(payload.avg_monthly_revenue_per_customer * payload.gross_margin_pct * 100) / 100;
+        computed.payback_months = Math.round((computed.cac / computed.monthly_gross_profit_per_customer) * 10) / 10;
+        steps.push({ type: "calculate", label: "CAC", code: `$${payload.total_acquisition_spend.toLocaleString()} / ${payload.new_customers}`, result: `$${computed.cac}` });
+        steps.push({ type: "calculate", label: "Monthly gross profit/cust", code: `$${payload.avg_monthly_revenue_per_customer} × ${payload.gross_margin_pct}`, result: `$${computed.monthly_gross_profit_per_customer}` });
+        steps.push({ type: "calculate", label: "Payback period", code: `$${computed.cac} / $${computed.monthly_gross_profit_per_customer}`, result: `${computed.payback_months} months` });
+      }
+
+      // ── AOV Analysis ──
+      if ("total_orders" in payload && "single_item_orders" in payload && payload.overall_aov === null) {
+        computed.overall_aov = Math.round((payload.total_revenue / payload.total_orders) * 100) / 100;
+        computed.single_item_aov = Math.round((payload.single_item_revenue / payload.single_item_orders) * 100) / 100;
+        computed.multi_item_aov = Math.round((payload.multi_item_revenue / payload.multi_item_orders) * 100) / 100;
+        computed.bundle_lift_pct = Math.round(((computed.multi_item_aov - computed.single_item_aov) / computed.single_item_aov) * 10000) / 100;
+        steps.push({ type: "calculate", label: "Overall AOV", code: `$${payload.total_revenue.toLocaleString()} / ${payload.total_orders}`, result: `$${computed.overall_aov}` });
+        steps.push({ type: "calculate", label: "Single-item AOV", code: `$${payload.single_item_revenue.toLocaleString()} / ${payload.single_item_orders}`, result: `$${computed.single_item_aov}` });
+        steps.push({ type: "calculate", label: "Multi-item AOV", code: `$${payload.multi_item_revenue.toLocaleString()} / ${payload.multi_item_orders}`, result: `$${computed.multi_item_aov}` });
+        steps.push({ type: "calculate", label: "Bundle lift", code: `($${computed.multi_item_aov} − $${computed.single_item_aov}) / $${computed.single_item_aov}`, result: `+${computed.bundle_lift_pct}%` });
+      }
+
+      // ── Gross vs Net Revenue ──
+      if ("gross_revenue" in payload && "discounts" in payload && "chargebacks" in payload && payload.net_revenue === null) {
+        computed.net_revenue = Math.round((payload.gross_revenue - payload.discounts - payload.returns - payload.chargebacks - (payload.shipping_paid - payload.shipping_collected)) * 100) / 100;
+        computed.discount_rate = Math.round((payload.discounts / payload.gross_revenue) * 10000) / 100;
+        computed.return_rate = Math.round((payload.returns / payload.gross_revenue) * 10000) / 100;
+        computed.shipping_loss = Math.round((payload.shipping_paid - payload.shipping_collected) * 100) / 100;
+        steps.push({ type: "calculate", label: "Net revenue", code: `$${payload.gross_revenue.toLocaleString()} − discounts − returns − chargebacks − shipping loss`, result: `$${computed.net_revenue.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "Discount rate", code: `$${payload.discounts.toLocaleString()} / $${payload.gross_revenue.toLocaleString()}`, result: `${computed.discount_rate}%` });
+        steps.push({ type: "calculate", label: "Shipping loss", code: `$${payload.shipping_paid.toLocaleString()} paid − $${payload.shipping_collected.toLocaleString()} collected`, result: `$${computed.shipping_loss}` });
+      }
+
+      // ── Funnel Conversion ──
+      if ("visitors" in payload && "product_views" in payload && "add_to_cart" in payload && payload.browse_to_view_rate === null) {
+        computed.browse_to_view_rate = Math.round((payload.product_views / payload.visitors) * 10000) / 100;
+        computed.view_to_cart_rate = Math.round((payload.add_to_cart / payload.product_views) * 10000) / 100;
+        computed.cart_to_checkout_rate = Math.round((payload.checkout_started / payload.add_to_cart) * 10000) / 100;
+        computed.checkout_to_purchase_rate = Math.round((payload.orders_completed / payload.checkout_started) * 10000) / 100;
+        computed.overall_conversion_rate = Math.round((payload.orders_completed / payload.visitors) * 10000) / 100;
+        const rates = [
+          { stage: "Browse→View", rate: computed.browse_to_view_rate },
+          { stage: "View→Cart", rate: computed.view_to_cart_rate },
+          { stage: "Cart→Checkout", rate: computed.cart_to_checkout_rate },
+          { stage: "Checkout→Purchase", rate: computed.checkout_to_purchase_rate },
+        ];
+        computed.biggest_dropoff = rates.reduce((min, r) => r.rate < min.rate ? r : min).stage;
+        rates.forEach(r => steps.push({ type: "calculate", label: r.stage, code: `conversion rate`, result: `${r.rate}%` }));
+        steps.push({ type: "calculate", label: "Biggest dropoff", code: `lowest conversion stage`, result: computed.biggest_dropoff });
+      }
+
+      // ── Shipping Efficiency ──
+      if ("total_orders_shipped" in payload && "carrier_costs" in payload && "warehouse_labor_shipping" in payload && payload.true_cost_per_order === null) {
+        const totalCost = payload.carrier_costs + payload.packaging_materials + payload.warehouse_labor_shipping;
+        computed.true_cost_per_order = Math.round((totalCost / payload.total_orders_shipped) * 100) / 100;
+        computed.shipping_deficit = Math.round((payload.shipping_revenue_collected - totalCost) * 100) / 100;
+        computed.free_shipping_subsidy = Math.round((payload.free_shipping_orders * computed.true_cost_per_order) * 100) / 100;
+        steps.push({ type: "calculate", label: "True cost/order", code: `($${payload.carrier_costs.toLocaleString()} + $${payload.packaging_materials} + $${payload.warehouse_labor_shipping.toLocaleString()}) / ${payload.total_orders_shipped}`, result: `$${computed.true_cost_per_order}` });
+        steps.push({ type: "calculate", label: "Shipping deficit", code: `$${payload.shipping_revenue_collected.toLocaleString()} collected − $${totalCost.toLocaleString()} cost`, result: `$${computed.shipping_deficit}` });
+        steps.push({ type: "calculate", label: "Free shipping subsidy", code: `${payload.free_shipping_orders} orders × $${computed.true_cost_per_order}`, result: `$${computed.free_shipping_subsidy.toLocaleString()}` });
+      }
+
+      // ── Refund Analysis ──
+      if ("total_refunds" in payload && "original_payment_processing_fee_pct" in payload && payload.total_refund_cost === null) {
+        const avgRefund = payload.refund_amount / payload.total_refunds;
+        computed.lost_processing_fees = Math.round((payload.refund_amount * payload.original_payment_processing_fee_pct + payload.total_refunds * payload.original_payment_fixed_fee) * 100) / 100;
+        computed.restocking_cost = Math.round(payload.total_refunds * payload.restocking_labor_per_unit * 100) / 100;
+        computed.unsellable_loss = Math.round(payload.total_refunds * payload.unsellable_pct * payload.avg_item_cost * 100) / 100;
+        computed.total_refund_cost = Math.round((payload.refund_amount + computed.lost_processing_fees + computed.restocking_cost + computed.unsellable_loss) * 100) / 100;
+        computed.true_cost_per_refund = Math.round((computed.total_refund_cost / payload.total_refunds) * 100) / 100;
+        steps.push({ type: "calculate", label: "Lost processing fees", code: `$${payload.refund_amount} × ${payload.original_payment_processing_fee_pct} + ${payload.total_refunds} × $${payload.original_payment_fixed_fee}`, result: `$${computed.lost_processing_fees}` });
+        steps.push({ type: "calculate", label: "Restocking cost", code: `${payload.total_refunds} × $${payload.restocking_labor_per_unit}`, result: `$${computed.restocking_cost}` });
+        steps.push({ type: "calculate", label: "Unsellable loss", code: `${payload.total_refunds} × ${payload.unsellable_pct} × $${payload.avg_item_cost}`, result: `$${computed.unsellable_loss}` });
+        steps.push({ type: "calculate", label: "True cost/refund", code: `$${computed.total_refund_cost.toLocaleString()} / ${payload.total_refunds}`, result: `$${computed.true_cost_per_refund}` });
+      }
+
+      // ── Email Campaign ROI ──
+      if ("emails_sent" in payload && "esp_cost" in payload && payload.open_rate === null) {
+        computed.open_rate = Math.round((payload.opens / payload.emails_sent) * 10000) / 100;
+        computed.click_rate = Math.round((payload.clicks / payload.emails_sent) * 10000) / 100;
+        computed.conversion_rate = Math.round((payload.conversions / payload.clicks) * 10000) / 100;
+        computed.total_cost = Math.round((payload.esp_cost + payload.copywriter_cost + payload.design_cost) * 100) / 100;
+        computed.roi_pct = Math.round(((payload.email_revenue - computed.total_cost) / computed.total_cost) * 10000) / 100;
+        computed.revenue_per_email = Math.round((payload.email_revenue / payload.emails_sent) * 10000) / 10000;
+        steps.push({ type: "calculate", label: "Open rate", code: `${payload.opens} / ${payload.emails_sent}`, result: `${computed.open_rate}%` });
+        steps.push({ type: "calculate", label: "Click rate", code: `${payload.clicks} / ${payload.emails_sent}`, result: `${computed.click_rate}%` });
+        steps.push({ type: "calculate", label: "Total cost", code: `ESP + copywriter + design`, result: `$${computed.total_cost.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "ROI", code: `($${payload.email_revenue.toLocaleString()} − $${computed.total_cost}) / $${computed.total_cost}`, result: `${computed.roi_pct}%` });
+      }
+
+      // ── Discount Impact ──
+      if ("normal_daily_orders" in payload && "sale_days" in payload && payload.sale_revenue === null) {
+        computed.sale_revenue = Math.round(payload.sale_days * payload.sale_orders_per_day * payload.sale_aov * 100) / 100;
+        computed.counterfactual_revenue = Math.round(payload.sale_days * payload.normal_daily_orders * payload.normal_aov * 100) / 100;
+        computed.incremental_revenue = Math.round((computed.sale_revenue - computed.counterfactual_revenue) * 100) / 100;
+        computed.sale_gross_profit = Math.round(computed.sale_revenue * (payload.normal_margin_pct - payload.discount_pct) * 100) / 100;
+        computed.counterfactual_gross_profit = Math.round(computed.counterfactual_revenue * payload.normal_margin_pct * 100) / 100;
+        computed.net_profit_impact = Math.round((computed.sale_gross_profit - computed.counterfactual_gross_profit) * 100) / 100;
+        steps.push({ type: "calculate", label: "Sale revenue", code: `${payload.sale_days} days × ${payload.sale_orders_per_day} orders × $${payload.sale_aov}`, result: `$${computed.sale_revenue.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "Counterfactual", code: `${payload.sale_days} days × ${payload.normal_daily_orders} orders × $${payload.normal_aov}`, result: `$${computed.counterfactual_revenue.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "Sale gross profit", code: `$${computed.sale_revenue.toLocaleString()} × (${payload.normal_margin_pct} − ${payload.discount_pct})`, result: `$${computed.sale_gross_profit.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "Net profit impact", code: `sale profit − counterfactual profit`, result: `$${computed.net_profit_impact.toLocaleString()}` });
+      }
+
+      // ── Warehouse Efficiency ──
+      if ("total_orders_fulfilled" in payload && "warehouse_rent" in payload && "picking_errors" in payload && payload.cost_per_order === null) {
+        const totalCost = payload.warehouse_rent + payload.warehouse_utilities + payload.warehouse_labor + payload.packaging_materials + payload.equipment_depreciation;
+        computed.cost_per_order = Math.round((totalCost / payload.total_orders_fulfilled) * 100) / 100;
+        computed.error_rate = Math.round((payload.picking_errors / payload.total_orders_fulfilled) * 10000) / 100;
+        computed.total_error_cost = Math.round(payload.picking_errors * payload.error_reshipment_cost * 100) / 100;
+        computed.labor_cost_per_order = Math.round((payload.warehouse_labor / payload.total_orders_fulfilled) * 100) / 100;
+        steps.push({ type: "calculate", label: "Cost per order", code: `$${totalCost.toLocaleString()} total / ${payload.total_orders_fulfilled} orders`, result: `$${computed.cost_per_order}` });
+        steps.push({ type: "calculate", label: "Error rate", code: `${payload.picking_errors} / ${payload.total_orders_fulfilled}`, result: `${computed.error_rate}%` });
+        steps.push({ type: "calculate", label: "Error cost", code: `${payload.picking_errors} × $${payload.error_reshipment_cost}`, result: `$${computed.total_error_cost}` });
+      }
+
+      // ── Payment Processing ──
+      if ("credit_card_volume" in payload && "paypal_volume" in payload && payload.total_processing_fees === null) {
+        const ccFees = Math.round((payload.credit_card_volume * payload.cc_rate + payload.credit_card_txns * payload.cc_fixed) * 100) / 100;
+        const ppFees = Math.round((payload.paypal_volume * payload.paypal_rate + payload.paypal_txns * payload.paypal_fixed) * 100) / 100;
+        const bnplFees = Math.round((payload.bnpl_volume * payload.bnpl_rate) * 100) / 100;
+        computed.total_processing_fees = Math.round((ccFees + ppFees + bnplFees) * 100) / 100;
+        const totalVol = payload.credit_card_volume + payload.paypal_volume + payload.bnpl_volume;
+        const totalTxns = payload.credit_card_txns + payload.paypal_txns + payload.bnpl_txns;
+        computed.effective_rate = Math.round((computed.total_processing_fees / totalVol) * 10000) / 100;
+        computed.cost_per_transaction = Math.round((computed.total_processing_fees / totalTxns) * 100) / 100;
+        steps.push({ type: "calculate", label: "CC fees", code: `$${payload.credit_card_volume.toLocaleString()} × ${payload.cc_rate} + ${payload.credit_card_txns} × $${payload.cc_fixed}`, result: `$${ccFees}` });
+        steps.push({ type: "calculate", label: "PayPal fees", code: `$${payload.paypal_volume.toLocaleString()} × ${payload.paypal_rate} + ${payload.paypal_txns} × $${payload.paypal_fixed}`, result: `$${ppFees}` });
+        steps.push({ type: "calculate", label: "BNPL fees", code: `$${payload.bnpl_volume.toLocaleString()} × ${payload.bnpl_rate}`, result: `$${bnplFees}` });
+        steps.push({ type: "calculate", label: "Effective rate", code: `$${computed.total_processing_fees} / $${totalVol.toLocaleString()}`, result: `${computed.effective_rate}%` });
+      }
+
+      // ── Sales Tax Estimate ──
+      if ("states" in payload && payload.state_liabilities === null) {
+        const st = payload.states;
+        computed.state_liabilities = {};
+        let total = 0;
+        let totalSales = 0;
+        Object.keys(st).forEach(s => {
+          const liability = Math.round(st[s].taxable_sales * st[s].rate * 100) / 100;
+          computed.state_liabilities[s] = liability;
+          total += liability;
+          totalSales += st[s].taxable_sales;
+          steps.push({ type: "calculate", label: `${s} tax`, code: `$${st[s].taxable_sales.toLocaleString()} × ${(st[s].rate * 100).toFixed(2)}%`, result: `$${liability.toLocaleString()}` });
+        });
+        computed.total_liability = Math.round(total * 100) / 100;
+        computed.effective_rate = Math.round((total / totalSales) * 10000) / 100;
+        steps.push({ type: "calculate", label: "Total liability", code: `sum of all states`, result: `$${computed.total_liability.toLocaleString()}` });
+      }
+
+      // ── COGS Breakdown ──
+      if ("raw_product_cost" in payload && "inbound_freight" in payload && "customs_duties" in payload && payload.landed_cost_per_unit === null) {
+        const totalBeforeShrink = payload.raw_product_cost + payload.inbound_freight + payload.customs_duties + payload.quality_inspection;
+        computed.shrinkage_cost = Math.round(totalBeforeShrink * payload.shrinkage_pct * 100) / 100;
+        computed.total_cogs = Math.round((totalBeforeShrink + computed.shrinkage_cost) * 100) / 100;
+        computed.landed_cost_per_unit = Math.round((computed.total_cogs / payload.units_purchased) * 100) / 100;
+        steps.push({ type: "calculate", label: "Pre-shrinkage cost", code: `product + freight + duties + inspection`, result: `$${totalBeforeShrink.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "Shrinkage cost", code: `$${totalBeforeShrink.toLocaleString()} × ${payload.shrinkage_pct}`, result: `$${computed.shrinkage_cost}` });
+        steps.push({ type: "calculate", label: "Landed cost/unit", code: `$${computed.total_cogs.toLocaleString()} / ${payload.units_purchased} units`, result: `$${computed.landed_cost_per_unit}` });
+      }
+
+      // ── Subscription Metrics ──
+      if ("active_subscribers_start" in payload && "new_subscribers" in payload && payload.active_subscribers_end === null) {
+        computed.active_subscribers_end = payload.active_subscribers_start + payload.new_subscribers - payload.churned_subscribers;
+        computed.mrr = Math.round(computed.active_subscribers_end * payload.avg_subscription_price * 100) / 100;
+        computed.expansion_mrr = Math.round(payload.upgraded_subscribers * payload.upgrade_avg_increase * 100) / 100;
+        computed.contraction_mrr = Math.round(payload.downgraded_subscribers * payload.downgrade_avg_decrease * 100) / 100;
+        computed.churn_mrr = Math.round(payload.churned_subscribers * payload.avg_subscription_price * 100) / 100;
+        computed.net_new_mrr = Math.round((payload.new_subscribers * payload.avg_subscription_price + computed.expansion_mrr - computed.contraction_mrr - computed.churn_mrr) * 100) / 100;
+        steps.push({ type: "calculate", label: "End subscribers", code: `${payload.active_subscribers_start} + ${payload.new_subscribers} − ${payload.churned_subscribers}`, result: `${computed.active_subscribers_end}` });
+        steps.push({ type: "calculate", label: "MRR", code: `${computed.active_subscribers_end} × $${payload.avg_subscription_price}`, result: `$${computed.mrr.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "Net new MRR", code: `new + expansion − contraction − churn`, result: `$${computed.net_new_mrr.toLocaleString()}` });
+      }
+
+      // ── Ad Attribution ──
+      if ("last_click_conversions" in payload && "attribution_weights" in payload && payload.weighted_conversions === null) {
+        const w = payload.attribution_weights;
+        computed.weighted_conversions = Math.round((payload.last_click_conversions * w.last_click + payload.assisted_conversions * w.assisted + payload.view_through_conversions * w.view_through) * 100) / 100;
+        computed.effective_cpa = Math.round((payload.total_ad_spend / computed.weighted_conversions) * 100) / 100;
+        computed.naive_cpa = Math.round((payload.total_ad_spend / payload.last_click_conversions) * 100) / 100;
+        steps.push({ type: "calculate", label: "Weighted conversions", code: `${payload.last_click_conversions}×${w.last_click} + ${payload.assisted_conversions}×${w.assisted} + ${payload.view_through_conversions}×${w.view_through}`, result: `${computed.weighted_conversions}` });
+        steps.push({ type: "calculate", label: "Effective CPA", code: `$${payload.total_ad_spend.toLocaleString()} / ${computed.weighted_conversions}`, result: `$${computed.effective_cpa}` });
+        steps.push({ type: "calculate", label: "Naive CPA (last-click)", code: `$${payload.total_ad_spend.toLocaleString()} / ${payload.last_click_conversions}`, result: `$${computed.naive_cpa}` });
+      }
+
+      // ── Seasonal Adjustment ──
+      if ("prior_year_same_month" in payload && "prior_year_annual" in payload && payload.seasonal_index === null) {
+        computed.prior_year_march_share = Math.round((payload.prior_year_same_month / payload.prior_year_annual) * 10000) / 100;
+        computed.seasonal_index = Math.round((computed.prior_year_march_share / (100/12)) * 100) / 100;
+        computed.deseasonalized_revenue = Math.round((payload.current_revenue / computed.seasonal_index) * 100) / 100;
+        computed.yoy_growth = Math.round(((payload.current_revenue - payload.prior_year_same_month) / payload.prior_year_same_month) * 10000) / 100;
+        const expectedRevenue = Math.round(payload.prior_year_annual * (computed.prior_year_march_share / 100) * (1 + computed.yoy_growth / 100));
+        computed.real_growth_adjusted = Math.round(((payload.current_revenue - payload.prior_year_same_month) / payload.prior_year_same_month) * 10000) / 100;
+        steps.push({ type: "calculate", label: "March share (prior yr)", code: `$${payload.prior_year_same_month.toLocaleString()} / $${payload.prior_year_annual.toLocaleString()}`, result: `${computed.prior_year_march_share}%` });
+        steps.push({ type: "calculate", label: "Seasonal index", code: `${computed.prior_year_march_share}% / ${(100/12).toFixed(2)}% (even share)`, result: `${computed.seasonal_index}` });
+        steps.push({ type: "calculate", label: "Deseasonalized rev", code: `$${payload.current_revenue.toLocaleString()} / ${computed.seasonal_index}`, result: `$${computed.deseasonalized_revenue.toLocaleString()}` });
+        steps.push({ type: "calculate", label: "YoY growth", code: `($${payload.current_revenue.toLocaleString()} − $${payload.prior_year_same_month.toLocaleString()}) / $${payload.prior_year_same_month.toLocaleString()}`, result: `${computed.yoy_growth}%` });
+      }
+
+      const nullsRemaining = Object.entries(computed).filter(([k, v]) => v === null && !["channels","products","states","attribution_weights"].includes(k)).map(([k]) => k);
       if (nullsRemaining.length > 0) {
         steps.push({
           type: "guard",
@@ -422,6 +1054,9 @@
       const [visibleSteps, setVisibleSteps] = useState(0);
       const [showPayload, setShowPayload] = useState(false);
       const [error, setError] = useState(null);
+      const [runAllResults, setRunAllResults] = useState(null);
+      const [runAllProgress, setRunAllProgress] = useState(0);
+      const [runAllTotal, setRunAllTotal] = useState(0);
 
       const scenario = SCENARIOS[activeIdx];
 
@@ -478,6 +1113,33 @@ Answer using ONLY the pre-computed data.`;
         }
       }, [scenario]);
 
+      const runAll = useCallback(async () => {
+        setRunAllResults(null);
+        setRunAllProgress(0);
+        setRunAllTotal(SCENARIOS.length);
+        const results = [];
+
+        for (let i = 0; i < SCENARIOS.length; i++) {
+          const s = SCENARIOS[i];
+          setRunAllProgress(i + 1);
+          try {
+            const naiveSystem = `You are a financial analytics assistant for an ecommerce platform. Answer the seller's question using the JSON data provided. Be helpful, give specific numbers, and provide context like comparisons, benchmarks, or recommendations where you can.`;
+            const naiveUser = `Seller question: "${s.question}"\n\nSeller data (JSON from platform API):\n${JSON.stringify(s.payload, null, 2)}`;
+
+            const { computed, steps } = computeDerivedFields(s.payload);
+            const nullsRemaining = Object.entries(computed).filter(([k, v]) => v === null && !["channels","products","states","attribution_weights"].includes(k)).map(([k]) => k);
+            const hybridSystem = `You are a financial analytics assistant. STRICT RULES:\n1. All numbers are PRE-COMPUTED below. NEVER calculate, estimate, or infer any number yourself.\n2. Fields listed as UNAVAILABLE have no data. Say "this data is not available" — do NOT guess.\n3. Do NOT reference industry benchmarks or external comparisons unless explicitly provided.\n4. Do NOT make projections unless multi-period data is provided.\n5. Under 80 words. State facts, cite the pre-computed numbers, note what's missing.`;
+            const hybridUser = `Seller question: "${s.question}"\n\nPRE-COMPUTED DATA (use these numbers verbatim):\n${JSON.stringify(computed, null, 2)}\n\nUNAVAILABLE FIELDS (do not guess): ${nullsRemaining.length > 0 ? nullsRemaining.join(", ") : "none"}\n\nAnswer using ONLY the pre-computed data.`;
+
+            const data = await callDemoAPI(naiveSystem, naiveUser, hybridSystem, hybridUser);
+            results.push({ scenario: s, naive: data.naive, hybrid: data.hybrid, steps });
+          } catch (e) {
+            results.push({ scenario: s, naive: "Error: " + e.message, hybrid: "Error: " + e.message, steps: [] });
+          }
+        }
+        setRunAllResults(results);
+      }, []);
+
       const cssVars = {
         "--mono": "'Fira Code', 'SF Mono', 'Consolas', monospace",
         "--sans": "'Libre Franklin', 'Helvetica Neue', sans-serif",
@@ -520,20 +1182,76 @@ Answer using ONLY the pre-computed data.`;
           </div>
 
           {/* Tabs */}
-          <div style={{ maxWidth: 1120, margin: "0 auto 10px", display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <div style={{ maxWidth: 1120, margin: "0 auto 10px", display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
             {SCENARIOS.map((s, i) => (
-              <button key={s.id} onClick={() => setActiveIdx(i)} style={{
+              <button key={s.id} onClick={() => { setActiveIdx(i); setRunAllResults(null); }} style={{
                 padding: "5px 14px", borderRadius: 5,
-                border: activeIdx === i ? "1px solid #6366f1" : "1px solid #1c1f2e",
-                background: activeIdx === i ? "#6366f110" : "#0d0e16",
-                color: activeIdx === i ? "#a5b4fc" : "#555d6f",
+                border: activeIdx === i && !runAllResults ? "1px solid #6366f1" : "1px solid #1c1f2e",
+                background: activeIdx === i && !runAllResults ? "#6366f110" : "#0d0e16",
+                color: activeIdx === i && !runAllResults ? "#a5b4fc" : "#555d6f",
                 fontSize: 11, fontWeight: 500, cursor: "pointer",
                 fontFamily: "var(--sans)", transition: "all 0.15s",
               }}>
                 {s.label}
               </button>
             ))}
+            <button onClick={runAll} disabled={runAllProgress > 0 && !runAllResults} style={{
+              padding: "5px 16px", borderRadius: 5, marginLeft: "auto",
+              border: "1px solid #f59e0b40",
+              background: runAllResults ? "#f59e0b15" : "#0d0e16",
+              color: "#f59e0b",
+              fontSize: 11, fontWeight: 600, cursor: "pointer",
+              fontFamily: "var(--sans)",
+            }}>
+              {runAllProgress > 0 && !runAllResults ? `Running ${runAllProgress}/${runAllTotal}...` : runAllResults ? `All ${SCENARIOS.length} Complete ↻` : `Run All ${SCENARIOS.length}`}
+            </button>
           </div>
+
+          {/* Run All Results */}
+          {runAllResults && (
+            <div style={{ maxWidth: 1120, margin: "0 auto 16px" }}>
+              <div style={{ background: "#0d0e16", border: "1px solid #1c1f2e", borderRadius: 9, padding: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <h3 style={{ fontFamily: "var(--display)", fontSize: 16, fontWeight: 700, color: "#f4f5f7", margin: 0 }}>
+                    All {SCENARIOS.length} Scenarios — Side by Side
+                  </h3>
+                  <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f" }}>
+                    Gemini 2.5 Flash ($$) vs Gemini 2.0 Flash Lite ($) + Architecture
+                  </span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {runAllResults.map((r, i) => (
+                    <div key={i} style={{
+                      display: "grid", gridTemplateColumns: "180px 1fr 1fr", gap: 8,
+                      padding: "10px 12px", background: "#0a0b11", borderRadius: 7,
+                      border: "1px solid #1c1f2e",
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#a5b4fc", marginBottom: 2 }}>{r.scenario.label}</div>
+                        <div style={{ fontSize: 9, color: "#555d6f", fontFamily: "var(--mono)" }}>{r.steps.length} compute steps</div>
+                      </div>
+                      <div style={{
+                        fontSize: 11, lineHeight: 1.5, color: "#c8ccd4",
+                        padding: "6px 8px", background: "#f43f5e05", borderRadius: 4,
+                        borderLeft: "2px solid #f43f5e", maxHeight: 120, overflow: "auto",
+                      }}>
+                        <div style={{ fontSize: 8, fontFamily: "var(--mono)", color: "#f43f5e", marginBottom: 3, textTransform: "uppercase" }}>2.5 Flash (raw)</div>
+                        {r.naive}
+                      </div>
+                      <div style={{
+                        fontSize: 11, lineHeight: 1.5, color: "#c8ccd4",
+                        padding: "6px 8px", background: "#10b98105", borderRadius: 4,
+                        borderLeft: "2px solid #10b981", maxHeight: 120, overflow: "auto",
+                      }}>
+                        <div style={{ fontSize: 8, fontFamily: "var(--mono)", color: "#10b981", marginBottom: 3, textTransform: "uppercase" }}>2.0 Flash Lite (hybrid)</div>
+                        {r.hybrid}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Query */}
           <div style={{ maxWidth: 1120, margin: "0 auto 12px" }}>
@@ -598,7 +1316,7 @@ Answer using ONLY the pre-computed data.`;
                     </span>
                   </div>
                   <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#f43f5e", opacity: 0.7, padding: "2px 6px", border: "1px solid #f43f5e20", borderRadius: 3 }}>
-                    Gemini 2.5 Pro &middot; $$$
+                    Gemini 2.5 Flash &middot; $$
                   </span>
                 </div>
                 <div style={{
@@ -621,10 +1339,10 @@ Answer using ONLY the pre-computed data.`;
                     background: "#f43f5e08", borderRadius: 5, border: "1px solid #f43f5e12",
                   }}>
                     <div style={{ fontSize: 9, fontWeight: 600, color: "#f43f5e", fontFamily: "var(--mono)", marginBottom: 2 }}>
-                      GEMINI 2.5 PRO &middot; NO VALIDATION
+                      GEMINI 2.5 FLASH &middot; NO VALIDATION
                     </div>
                     <div style={{ fontSize: 10, color: "#8b5a5a", lineHeight: 1.4 }}>
-                      The most capable model money can buy. Check: Did it still invent benchmarks?
+                      A capable, expensive model with raw data. Check: Did it invent benchmarks?
                       Do its own math (possibly wrong)? Claim trends from one data point?
                     </div>
                   </div>
