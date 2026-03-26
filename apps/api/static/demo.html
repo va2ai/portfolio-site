@@ -46,90 +46,301 @@
 
     const SCENARIOS = [
       {
-        id: "margin",
-        label: "Profit Margin",
-        question: "What's my profit margin for March?",
+        id: "ltv",
+        label: "LTV:CAC Ratio",
+        question: "What's my LTV to CAC ratio? Am I spending too much to acquire customers?",
         payload: {
           seller_id: "SLR-4821",
-          period: "2026-03",
-          revenue: 48750.00,
-          cogs: 31200.00,
-          operating_expenses: 8900.00,
-          returns: 2150.00,
-          net_income: null,
-          profit_margin: null,
-        },
-      },
-      {
-        id: "cac",
-        label: "Customer Acq. Cost",
-        question: "What's my customer acquisition cost this month?",
-        payload: {
-          seller_id: "SLR-4821",
-          period: "2026-03",
-          ad_spend: 4200.00,
-          marketing_other: 1800.00,
-          new_customers: 145,
-          total_customers: 892,
+          period: "2026-Q1",
+          avg_order_value: 67.30,
+          orders_per_customer_per_year: 3.2,
+          gross_margin_pct: 0.42,
+          avg_customer_lifespan_years: 2.7,
+          ad_spend: 12400.00,
+          marketing_salaries: 8500.00,
+          marketing_software: 1900.00,
+          new_customers_acquired: 310,
+          ltv: null,
           cac: null,
+          ltv_cac_ratio: null,
         },
       },
       {
-        id: "trend",
-        label: "Revenue Trend",
-        question: "Is my revenue trending up or down?",
+        id: "blended",
+        label: "Blended ROAS",
+        question: "What's my blended return on ad spend across all channels?",
         payload: {
           seller_id: "SLR-4821",
           period: "2026-03",
-          revenue: 48750.00,
-          prior_periods: null,
-          yoy_growth: null,
+          channels: {
+            google: { spend: 5830.00, attributed_revenue: 28400.00, conversions: 142 },
+            meta: { spend: 3200.00, attributed_revenue: 11750.00, conversions: 89 },
+            tiktok: { spend: 1750.00, attributed_revenue: 4100.00, conversions: 31 },
+            email: { spend: 420.00, attributed_revenue: 19200.00, conversions: 204 },
+          },
+          total_spend: null,
+          total_attributed_revenue: null,
+          blended_roas: null,
+          best_channel: null,
+          worst_channel: null,
+          cost_per_conversion: null,
+        },
+      },
+      {
+        id: "runway",
+        label: "Cash Runway",
+        question: "How many months of runway do I have left? Should I be worried?",
+        payload: {
+          seller_id: "SLR-4821",
+          period: "2026-03",
+          cash_on_hand: 142000.00,
+          monthly_revenue: 48750.00,
+          monthly_cogs: 31200.00,
+          monthly_payroll: 22400.00,
+          monthly_rent: 3200.00,
+          monthly_software: 1850.00,
+          monthly_marketing: 6200.00,
+          monthly_other: 980.00,
+          accounts_receivable: 18500.00,
+          accounts_payable: 9200.00,
+          monthly_burn: null,
+          net_cash_flow: null,
+          runway_months: null,
+          net_working_capital_adjustment: null,
+        },
+      },
+      {
+        id: "cohort",
+        label: "Cohort Retention",
+        question: "How is my January cohort performing? What's the projected lifetime revenue?",
+        payload: {
+          seller_id: "SLR-4821",
+          cohort: "2026-01",
+          initial_customers: 285,
+          month_1_active: 285,
+          month_2_active: 198,
+          month_3_active: 156,
+          month_1_revenue: 19237.50,
+          month_2_revenue: 14652.00,
+          month_3_revenue: 12480.00,
+          avg_revenue_per_active: null,
+          retention_rate_m2: null,
+          retention_rate_m3: null,
+          projected_12mo_revenue: null,
         },
       },
     ];
 
     function computeDerivedFields(payload) {
-      const computed = { ...payload };
+      const computed = JSON.parse(JSON.stringify(payload));
       const steps = [];
 
-      if ("revenue" in payload && "cogs" in payload && "operating_expenses" in payload && "returns" in payload && payload.net_income === null) {
-        const net = payload.revenue - payload.cogs - payload.operating_expenses - payload.returns;
-        computed.net_income = Math.round(net * 100) / 100;
+      // ── LTV:CAC Ratio (4-step chain) ──
+      if ("avg_order_value" in payload && "orders_per_customer_per_year" in payload && "gross_margin_pct" in payload && "avg_customer_lifespan_years" in payload && payload.ltv === null) {
+        const annualValue = payload.avg_order_value * payload.orders_per_customer_per_year;
+        const grossProfit = annualValue * payload.gross_margin_pct;
+        computed.ltv = Math.round(grossProfit * payload.avg_customer_lifespan_years * 100) / 100;
         steps.push({
           type: "calculate",
-          label: "Net Income",
-          code: `${payload.revenue} − ${payload.cogs} − ${payload.operating_expenses} − ${payload.returns}`,
-          result: `$${computed.net_income.toLocaleString()}`,
+          label: "Annual Customer Value",
+          code: `$${payload.avg_order_value} × ${payload.orders_per_customer_per_year} orders/yr`,
+          result: `$${annualValue.toFixed(2)}`,
         });
-        if (payload.profit_margin === null && payload.revenue > 0) {
-          computed.profit_margin = Math.round((computed.net_income / payload.revenue) * 10000) / 100;
-          steps.push({
-            type: "calculate",
-            label: "Profit Margin",
-            code: `(${computed.net_income} / ${payload.revenue}) × 100`,
-            result: `${computed.profit_margin}%`,
-          });
-        }
+        steps.push({
+          type: "calculate",
+          label: "Annual Gross Profit",
+          code: `$${annualValue.toFixed(2)} × ${payload.gross_margin_pct} margin`,
+          result: `$${grossProfit.toFixed(2)}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Lifetime Value (LTV)",
+          code: `$${grossProfit.toFixed(2)} × ${payload.avg_customer_lifespan_years} years`,
+          result: `$${computed.ltv.toLocaleString()}`,
+        });
       }
 
-      if ("ad_spend" in payload && "marketing_other" in payload && "new_customers" in payload && payload.cac === null) {
-        const totalMktg = payload.ad_spend + payload.marketing_other;
-        computed.cac = Math.round((totalMktg / payload.new_customers) * 100) / 100;
+      if ("ad_spend" in payload && "marketing_salaries" in payload && "marketing_software" in payload && "new_customers_acquired" in payload && payload.cac === null) {
+        const totalMktg = payload.ad_spend + payload.marketing_salaries + payload.marketing_software;
+        computed.cac = Math.round((totalMktg / payload.new_customers_acquired) * 100) / 100;
         steps.push({
           type: "calculate",
-          label: "Total Marketing",
-          code: `${payload.ad_spend} + ${payload.marketing_other}`,
+          label: "Total Acq. Cost",
+          code: `$${payload.ad_spend.toLocaleString()} + $${payload.marketing_salaries.toLocaleString()} + $${payload.marketing_software.toLocaleString()}`,
           result: `$${totalMktg.toLocaleString()}`,
         });
         steps.push({
           type: "calculate",
           label: "CAC",
-          code: `${totalMktg} / ${payload.new_customers}`,
+          code: `$${totalMktg.toLocaleString()} / ${payload.new_customers_acquired} customers`,
           result: `$${computed.cac}`,
         });
       }
 
-      const nullsRemaining = Object.entries(computed).filter(([, v]) => v === null).map(([k]) => k);
+      if (computed.ltv !== null && computed.cac !== null && payload.ltv_cac_ratio === null) {
+        computed.ltv_cac_ratio = Math.round((computed.ltv / computed.cac) * 100) / 100;
+        steps.push({
+          type: "calculate",
+          label: "LTV:CAC Ratio",
+          code: `$${computed.ltv} / $${computed.cac}`,
+          result: `${computed.ltv_cac_ratio}:1`,
+        });
+      }
+
+      // ── Blended ROAS (multi-channel aggregation) ──
+      if ("channels" in payload && payload.total_spend === null) {
+        const ch = payload.channels;
+        const names = Object.keys(ch);
+        let totalSpend = 0, totalRev = 0, totalConv = 0;
+        const channelROAS = {};
+
+        names.forEach(name => {
+          totalSpend += ch[name].spend;
+          totalRev += ch[name].attributed_revenue;
+          totalConv += ch[name].conversions;
+          channelROAS[name] = Math.round((ch[name].attributed_revenue / ch[name].spend) * 100) / 100;
+        });
+
+        computed.total_spend = Math.round(totalSpend * 100) / 100;
+        computed.total_attributed_revenue = Math.round(totalRev * 100) / 100;
+        computed.blended_roas = Math.round((totalRev / totalSpend) * 100) / 100;
+        computed.cost_per_conversion = Math.round((totalSpend / totalConv) * 100) / 100;
+
+        steps.push({
+          type: "calculate",
+          label: "Total Ad Spend",
+          code: names.map(n => `$${ch[n].spend.toLocaleString()}`).join(" + "),
+          result: `$${computed.total_spend.toLocaleString()}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Total Attributed Rev",
+          code: names.map(n => `$${ch[n].attributed_revenue.toLocaleString()}`).join(" + "),
+          result: `$${computed.total_attributed_revenue.toLocaleString()}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Blended ROAS",
+          code: `$${computed.total_attributed_revenue.toLocaleString()} / $${computed.total_spend.toLocaleString()}`,
+          result: `${computed.blended_roas}x`,
+        });
+
+        const sorted = names.sort((a, b) => channelROAS[b] - channelROAS[a]);
+        computed.best_channel = `${sorted[0]} (${channelROAS[sorted[0]]}x ROAS)`;
+        computed.worst_channel = `${sorted[sorted.length - 1]} (${channelROAS[sorted[sorted.length - 1]]}x ROAS)`;
+        steps.push({
+          type: "calculate",
+          label: "Best / Worst Channel",
+          code: names.map(n => `${n}: ${channelROAS[n]}x`).join(", "),
+          result: `${sorted[0]} / ${sorted[sorted.length - 1]}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Cost per Conversion",
+          code: `$${computed.total_spend.toLocaleString()} / ${totalConv} conversions`,
+          result: `$${computed.cost_per_conversion}`,
+        });
+      }
+
+      // ── Cash Runway (burn rate + working capital) ──
+      if ("cash_on_hand" in payload && "monthly_revenue" in payload && "monthly_cogs" in payload && "monthly_payroll" in payload && payload.monthly_burn === null) {
+        const totalExpenses = payload.monthly_cogs + payload.monthly_payroll + payload.monthly_rent + payload.monthly_software + payload.monthly_marketing + payload.monthly_other;
+        computed.monthly_burn = Math.round(totalExpenses * 100) / 100;
+        computed.net_cash_flow = Math.round((payload.monthly_revenue - totalExpenses) * 100) / 100;
+        computed.net_working_capital_adjustment = Math.round((payload.accounts_receivable - payload.accounts_payable) * 100) / 100;
+        const effectiveCash = payload.cash_on_hand + computed.net_working_capital_adjustment;
+
+        steps.push({
+          type: "calculate",
+          label: "Monthly Burn",
+          code: `COGS + payroll + rent + software + marketing + other`,
+          result: `$${computed.monthly_burn.toLocaleString()}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Net Cash Flow",
+          code: `$${payload.monthly_revenue.toLocaleString()} revenue − $${computed.monthly_burn.toLocaleString()} expenses`,
+          result: `$${computed.net_cash_flow.toLocaleString()}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Working Capital Adj.",
+          code: `$${payload.accounts_receivable.toLocaleString()} AR − $${payload.accounts_payable.toLocaleString()} AP`,
+          result: `$${computed.net_working_capital_adjustment.toLocaleString()}`,
+        });
+
+        if (computed.net_cash_flow < 0) {
+          computed.runway_months = Math.round((effectiveCash / Math.abs(computed.net_cash_flow)) * 10) / 10;
+          steps.push({
+            type: "calculate",
+            label: "Runway (months)",
+            code: `($${payload.cash_on_hand.toLocaleString()} + $${computed.net_working_capital_adjustment.toLocaleString()}) / |$${computed.net_cash_flow.toLocaleString()}|`,
+            result: `${computed.runway_months} months`,
+          });
+        } else {
+          computed.runway_months = "Infinite (cash-flow positive)";
+          steps.push({
+            type: "calculate",
+            label: "Runway",
+            code: `Net cash flow is positive — not burning cash`,
+            result: `Cash-flow positive`,
+          });
+        }
+      }
+
+      // ── Cohort Retention (retention rates + projected revenue) ──
+      if ("initial_customers" in payload && "month_2_active" in payload && "month_3_active" in payload && payload.retention_rate_m2 === null) {
+        computed.retention_rate_m2 = Math.round((payload.month_2_active / payload.initial_customers) * 10000) / 100;
+        computed.retention_rate_m3 = Math.round((payload.month_3_active / payload.initial_customers) * 10000) / 100;
+
+        const avgRevPerActive = Math.round(((payload.month_1_revenue / payload.month_1_active) + (payload.month_2_revenue / payload.month_2_active) + (payload.month_3_revenue / payload.month_3_active)) / 3 * 100) / 100;
+        computed.avg_revenue_per_active = avgRevPerActive;
+
+        steps.push({
+          type: "calculate",
+          label: "M2 Retention",
+          code: `${payload.month_2_active} / ${payload.initial_customers} initial`,
+          result: `${computed.retention_rate_m2}%`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "M3 Retention",
+          code: `${payload.month_3_active} / ${payload.initial_customers} initial`,
+          result: `${computed.retention_rate_m3}%`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Avg Rev / Active User",
+          code: `mean(M1: $${(payload.month_1_revenue/payload.month_1_active).toFixed(2)}, M2: $${(payload.month_2_revenue/payload.month_2_active).toFixed(2)}, M3: $${(payload.month_3_revenue/payload.month_3_active).toFixed(2)})`,
+          result: `$${avgRevPerActive}`,
+        });
+
+        // Project using M2→M3 decay rate
+        const decayRate = payload.month_3_active / payload.month_2_active;
+        let projectedRev = payload.month_1_revenue + payload.month_2_revenue + payload.month_3_revenue;
+        let activeUsers = payload.month_3_active;
+        for (let m = 4; m <= 12; m++) {
+          activeUsers = Math.round(activeUsers * decayRate);
+          if (activeUsers < 1) break;
+          projectedRev += activeUsers * avgRevPerActive;
+        }
+        computed.projected_12mo_revenue = Math.round(projectedRev * 100) / 100;
+
+        steps.push({
+          type: "calculate",
+          label: "Decay Rate (M2→M3)",
+          code: `${payload.month_3_active} / ${payload.month_2_active}`,
+          result: `${Math.round(decayRate * 1000) / 1000}`,
+        });
+        steps.push({
+          type: "calculate",
+          label: "Projected 12mo Revenue",
+          code: `Sum months 1-3 actual + months 4-12 projected at decay rate`,
+          result: `$${computed.projected_12mo_revenue.toLocaleString()}`,
+        });
+      }
+
+      const nullsRemaining = Object.entries(computed).filter(([k, v]) => v === null && k !== "channels").map(([k]) => k);
       if (nullsRemaining.length > 0) {
         steps.push({
           type: "guard",
@@ -287,11 +498,11 @@ Answer using ONLY the pre-computed data.`;
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b98155" }} />
                   <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    Live &middot; Real Gemini 3 Flash Calls
+                    Live &middot; Real Gemini API Calls &middot; Two Different Models
                   </span>
                 </div>
                 <h1 style={{ fontFamily: "var(--display)", fontSize: "clamp(22px,3.2vw,34px)", fontWeight: 700, color: "#f4f5f7", margin: 0, lineHeight: 1.1 }}>
-                  Prompt-Only <span style={{ color: "#555d6f", fontWeight: 400 }}>vs</span> Hybrid System
+                  Expensive Model <span style={{ color: "#555d6f", fontWeight: 400 }}>vs</span> Cheap Model + Architecture
                 </h1>
               </div>
               <a href="/" style={{
@@ -303,8 +514,8 @@ Answer using ONLY the pre-computed data.`;
               </a>
             </div>
             <p style={{ fontSize: 12, color: "#6b7280", marginTop: 4, maxWidth: 580, lineHeight: 1.5 }}>
-              Both sides call Gemini with the same question and JSON payload.
-              Left sends it raw. Right validates, computes, and constrains first.
+              Left: the most expensive model with raw data and no guardrails.
+              Right: the cheapest model with pre-validated, pre-computed data. Architecture wins.
             </p>
           </div>
 
@@ -355,7 +566,7 @@ Answer using ONLY the pre-computed data.`;
                   fontFamily: "var(--sans)",
                   boxShadow: phase !== "running" ? "0 2px 10px #f43f5e44" : "none",
                 }}>
-                  {phase === "idle" ? "\u25B6 Call Gemini" : phase === "running" ? "\u23F3 Calling..." : "\u21BB Run Again"}
+                  {phase === "idle" ? "\u25B6 Run Both Models" : phase === "running" ? "\u23F3 Calling..." : "\u21BB Run Again"}
                 </button>
               </div>
             </div>
@@ -373,16 +584,21 @@ Answer using ONLY the pre-computed data.`;
           {/* Results */}
           {phase !== "idle" && (
             <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              {/* LEFT — Prompt-Only */}
+              {/* LEFT — Expensive Model, No Guardrails */}
               <div style={{
                 background: "#0d0e16", border: "1px solid #2a1520",
                 borderTop: "3px solid #f43f5e", borderRadius: 9, padding: 14,
                 display: "flex", flexDirection: "column",
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#f43f5e" }} />
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#f43f5e", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    Prompt-Only
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 7 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#f43f5e" }} />
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "#f43f5e", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Prompt-Only
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#f43f5e", opacity: 0.7, padding: "2px 6px", border: "1px solid #f43f5e20", borderRadius: 3 }}>
+                    Gemini 2.5 Pro &middot; $$$
                   </span>
                 </div>
                 <div style={{
@@ -390,7 +606,7 @@ Answer using ONLY the pre-computed data.`;
                   padding: "3px 6px", background: "#f43f5e06", borderRadius: 3,
                   border: "1px solid #f43f5e10", marginBottom: 8,
                 }}>
-                  "Be helpful, give specific numbers, provide benchmarks &amp; recommendations"
+                  Most expensive model. Raw data. "Be helpful, give numbers, provide benchmarks."
                 </div>
                 <div style={{
                   flex: 1, fontSize: 13, lineHeight: 1.6, color: "#c8ccd4",
@@ -405,26 +621,31 @@ Answer using ONLY the pre-computed data.`;
                     background: "#f43f5e08", borderRadius: 5, border: "1px solid #f43f5e12",
                   }}>
                     <div style={{ fontSize: 9, fontWeight: 600, color: "#f43f5e", fontFamily: "var(--mono)", marginBottom: 2 }}>
-                      NO VALIDATION LAYER
+                      GEMINI 2.5 PRO &middot; NO VALIDATION
                     </div>
                     <div style={{ fontSize: 10, color: "#8b5a5a", lineHeight: 1.4 }}>
-                      Check: Did it invent benchmarks? Do its own math (possibly wrong)?
-                      Claim trends from one data point? Recommend actions without basis?
+                      The most capable model money can buy. Check: Did it still invent benchmarks?
+                      Do its own math (possibly wrong)? Claim trends from one data point?
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* RIGHT — Hybrid */}
+              {/* RIGHT — Cheapest Model + Architecture */}
               <div style={{
                 background: "#0d0e16", border: "1px solid #15281f",
                 borderTop: "3px solid #10b981", borderRadius: 9, padding: 14,
                 display: "flex", flexDirection: "column",
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }} />
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#10b981", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    Hybrid System
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 7 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }} />
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "#10b981", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Hybrid System
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#10b981", opacity: 0.7, padding: "2px 6px", border: "1px solid #10b98120", borderRadius: 3 }}>
+                    Gemini 2.0 Flash Lite &middot; $
                   </span>
                 </div>
                 <div style={{
@@ -432,7 +653,7 @@ Answer using ONLY the pre-computed data.`;
                   padding: "3px 6px", background: "#10b98106", borderRadius: 3,
                   border: "1px solid #10b98110", marginBottom: 8,
                 }}>
-                  validate &rarr; compute (deterministic JS) &rarr; guard nulls &rarr; constrained generate
+                  Cheapest model. validate &rarr; compute (deterministic JS) &rarr; guard nulls &rarr; constrained generate
                 </div>
 
                 {computeSteps.length > 0 && (
@@ -460,11 +681,11 @@ Answer using ONLY the pre-computed data.`;
                     background: "#10b98108", borderRadius: 5, border: "1px solid #10b98112",
                   }}>
                     <div style={{ fontSize: 9, fontWeight: 600, color: "#10b981", fontFamily: "var(--mono)", marginBottom: 2 }}>
-                      MATH BY CODE &middot; SCOPE ENFORCED &middot; NULLS DECLARED
+                      CHEAPEST MODEL &middot; BETTER RESULTS &middot; LOWER COST
                     </div>
                     <div style={{ fontSize: 10, color: "#5a8b6a", lineHeight: 1.4 }}>
-                      Numbers computed in JavaScript before the LLM ran. Null fields declared
-                      unavailable. LLM wrote language around pre-verified facts only.
+                      All math computed in JavaScript before the cheapest LLM ran.
+                      Architecture beats model size. Correct answers at a fraction of the cost.
                     </div>
                   </div>
                 )}
@@ -518,9 +739,10 @@ Answer using ONLY the pre-computed data.`;
                 background: "#0a0b11", borderRadius: 5, border: "1px solid #1c1f2e",
                 fontSize: 12, color: "#6b7280", lineHeight: 1.5, fontStyle: "italic",
               }}>
-                The fix isn't better prompting alone. It's a systems approach — let the LLM handle
-                reasoning and natural language, but route all calculations and data lookups through
-                validated code paths. Make hallucinations structurally impossible, not just less likely.
+                The fix isn't a bigger model or better prompting. It's architecture. The cheapest model
+                with validated data and constrained generation outperforms the most expensive model
+                running blind. Route calculations through deterministic code. Let the LLM do what it's
+                good at — language — and nothing else.
               </p>
             </div>
           </div>

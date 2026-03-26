@@ -128,6 +128,10 @@ async def clear_session(session_id: str):
 
 # ─── Demo endpoint (Hybrid vs Prompt-Only comparison) ─────────────
 
+NAIVE_MODEL = "gemini-2.5-pro"          # expensive model, no guardrails
+HYBRID_MODEL = "gemini-2.0-flash-lite"  # cheapest model, with hybrid architecture
+
+
 class DemoRequest(BaseModel):
     naive_system: str
     naive_user: str
@@ -137,7 +141,7 @@ class DemoRequest(BaseModel):
 
 @router.post("/demo")
 async def demo_compare(req: DemoRequest):
-    """Run two LLM calls in parallel: naive (prompt-only) and hybrid (constrained)."""
+    """Run two LLM calls in parallel: expensive model raw vs cheap model with hybrid architecture."""
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or settings.google_api_key
     if not api_key:
         return {"error": "Server configuration error: no API key set."}
@@ -147,9 +151,8 @@ async def demo_compare(req: DemoRequest):
     import asyncio
 
     client = genai.Client(api_key=api_key)
-    model = "gemini-3-flash-preview"
 
-    async def call_gemini(system: str, user: str) -> str:
+    async def call_gemini(model: str, system: str, user: str) -> str:
         try:
             response = client.models.generate_content(
                 model=model,
@@ -162,12 +165,17 @@ async def demo_compare(req: DemoRequest):
             )
             return response.text or "No response."
         except Exception as e:
-            logger.error(f"Demo Gemini error: {e}", exc_info=True)
+            logger.error(f"Demo Gemini error ({model}): {e}", exc_info=True)
             return f"Error: {e}"
 
     naive_result, hybrid_result = await asyncio.gather(
-        call_gemini(req.naive_system, req.naive_user),
-        call_gemini(req.hybrid_system, req.hybrid_user),
+        call_gemini(NAIVE_MODEL, req.naive_system, req.naive_user),
+        call_gemini(HYBRID_MODEL, req.hybrid_system, req.hybrid_user),
     )
 
-    return {"naive": naive_result, "hybrid": hybrid_result}
+    return {
+        "naive": naive_result,
+        "hybrid": hybrid_result,
+        "naive_model": NAIVE_MODEL,
+        "hybrid_model": HYBRID_MODEL,
+    }
