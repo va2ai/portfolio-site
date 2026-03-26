@@ -1,0 +1,342 @@
+# ElevenLabs Conversational AI Agent — Setup Guide
+# Complete configuration for Chris Combs' portfolio voice agent
+
+---
+
+## STEP 1: CREATE THE AGENT
+
+1. Go to elevenlabs.io → Conversational AI → Create Agent
+2. Select "Blank" template
+3. Name: "Chris Combs Portfolio Agent"
+
+---
+
+## STEP 2: VOICE SELECTION
+
+Recommended voices (test each with a sample from the system prompt):
+- "Josh" — Professional, calm male voice. Good for business contexts.
+- "Adam" — Clear, neutral male voice. Versatile.
+- "Antoni" — Warm, approachable. Good for freelance client conversations.
+
+Settings:
+- Stability: 0.5 (natural variation without being erratic)
+- Clarity + Similarity Enhancement: 0.75
+- Style: 0 (neutral, professional)
+- Speaker Boost: enabled
+
+---
+
+## STEP 3: SYSTEM PROMPT
+
+Paste the entire contents of `system-prompt.txt` into the System Prompt field.
+
+---
+
+## STEP 4: KNOWLEDGE BASE
+
+1. In the Knowledge Base section, click "Add Document"
+2. Upload `knowledge-base.txt` as a document
+3. This gives the agent structured reference data it can search during conversations
+
+---
+
+## STEP 5: CONFIGURE TOOLS
+
+ElevenLabs agents support custom tools that execute during conversation. Configure these four:
+
+### Tool 1: collect_contact_info
+Purpose: Captures recruiter/client lead information
+
+```json
+{
+  "name": "collect_contact_info",
+  "description": "Collect visitor contact information for Chris to follow up. Call this when the visitor offers their name, email, company, or expresses interest in connecting with Chris.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Visitor's full name"
+      },
+      "email": {
+        "type": "string",
+        "description": "Visitor's email address"
+      },
+      "company": {
+        "type": "string",
+        "description": "Company or organization name"
+      },
+      "role_or_project": {
+        "type": "string",
+        "description": "The role they are hiring for or project they need help with"
+      },
+      "visitor_type": {
+        "type": "string",
+        "enum": ["recruiter", "hiring_manager", "freelance_client", "general"],
+        "description": "Type of visitor"
+      }
+    },
+    "required": ["name"]
+  }
+}
+```
+
+Implementation type: **Client-side** (webhook to your backend or external service)
+
+### Tool 2: schedule_callback
+Purpose: Books a follow-up call or meeting
+
+```json
+{
+  "name": "schedule_callback",
+  "description": "Schedule a callback or meeting with Chris. Call this when the visitor wants to set up a time to talk directly with Chris.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Visitor's name"
+      },
+      "email": {
+        "type": "string",
+        "description": "Email for calendar invite"
+      },
+      "preferred_time": {
+        "type": "string",
+        "description": "When they'd like to talk (e.g., 'tomorrow afternoon', 'next week')"
+      },
+      "topic": {
+        "type": "string",
+        "description": "What they want to discuss"
+      }
+    },
+    "required": ["name", "email"]
+  }
+}
+```
+
+Implementation type: **Client-side** or **Webhook** (can integrate with Calendly API, Google Calendar, or simple email notification)
+
+### Tool 3: open_portfolio_link
+Purpose: Directs callers to specific URLs during conversation
+
+```json
+{
+  "name": "open_portfolio_link",
+  "description": "Open a link to one of Chris's projects or profiles. Use when the visitor wants to see a live demo or Chris's GitHub/LinkedIn.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "link_type": {
+        "type": "string",
+        "enum": ["v2v_platform", "github", "portfolio_site", "bva_api"],
+        "description": "Which link to open"
+      }
+    },
+    "required": ["link_type"]
+  }
+}
+```
+
+Implementation type: **Client-side** — your JavaScript handles the window.open()
+
+### Tool 4: notify_chris (Optional)
+Purpose: Sends real-time notification when a qualified lead calls
+
+```json
+{
+  "name": "notify_chris",
+  "description": "Send Chris a notification about this conversation. Use after collecting contact info from a qualified lead.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "summary": {
+        "type": "string",
+        "description": "Brief summary of who called and what they need"
+      },
+      "priority": {
+        "type": "string",
+        "enum": ["high", "normal"],
+        "description": "High for active hiring/funded projects, normal for general inquiries"
+      }
+    },
+    "required": ["summary"]
+  }
+}
+```
+
+Implementation type: **Webhook** to your backend, which can email/Slack/SMS you
+
+---
+
+## STEP 6: CLIENT-SIDE TOOL HANDLERS (JavaScript)
+
+Add this to your portfolio page where the ElevenLabs widget is embedded:
+
+```javascript
+// ElevenLabs client-side tool handlers
+// Add these to your portfolio page alongside the ElevenLabs widget embed
+
+const PORTFOLIO_LINKS = {
+  v2v_platform: "https://vaclaims-194006.web.app",
+  github: "https://github.com/va2ai",
+  portfolio_site: window.location.origin,
+  bva_api: "https://bva-api-301313738047.us-central1.run.app"
+};
+
+function handleElevenLabsToolCall(toolName, params) {
+  switch (toolName) {
+    case "collect_contact_info":
+      // Store lead data — send to your backend or a form service
+      console.log("Lead captured:", params);
+      fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...params,
+          timestamp: new Date().toISOString(),
+          source: "elevenlabs_voice_agent"
+        })
+      }).catch(err => console.error("Lead capture failed:", err));
+      return { success: true, message: "Contact info saved. Chris will follow up." };
+
+    case "schedule_callback":
+      console.log("Callback requested:", params);
+      fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...params,
+          type: "callback_request",
+          timestamp: new Date().toISOString(),
+          source: "elevenlabs_voice_agent"
+        })
+      }).catch(err => console.error("Callback scheduling failed:", err));
+      return { success: true, message: "Callback request sent. Chris will reach out to confirm a time." };
+
+    case "open_portfolio_link":
+      const url = PORTFOLIO_LINKS[params.link_type];
+      if (url) {
+        window.open(url, "_blank");
+        return { success: true, message: `Opened ${params.link_type} in a new tab.` };
+      }
+      return { success: false, message: "Link not found." };
+
+    default:
+      return { success: false, message: "Unknown tool." };
+  }
+}
+```
+
+---
+
+## STEP 7: PHONE NUMBER SETUP (Twilio Integration)
+
+### Option A: Native Twilio Import (Recommended)
+
+1. **Buy a Twilio number:**
+   - Go to twilio.com → Phone Numbers → Buy a Number
+   - Select a local number in the 937 (Dayton) or 513 (Cincinnati) area code
+   - Cost: ~$1.15/month
+
+2. **Get Twilio credentials:**
+   - Account SID: Found on Twilio Console dashboard
+   - Auth Token: Found on Twilio Console dashboard
+
+3. **Import into ElevenLabs:**
+   - In your ElevenLabs agent settings → Phone Numbers → Import Phone Number
+   - Enter the Twilio phone number, Account SID, and Auth Token
+   - ElevenLabs automatically configures the Twilio webhooks
+
+4. **Assign to agent:**
+   - In Phone Numbers, assign the imported number to your "Chris Combs Portfolio Agent"
+   - The number is now live — calls route directly to the voice agent
+
+### Option B: ElevenLabs Native Number
+- ElevenLabs may offer native phone numbers depending on your plan
+- Check Conversational AI → Phone Numbers for availability
+- Simpler setup but less control over the number
+
+### Cost Estimate (Light Usage)
+- Twilio number: $1.15/month
+- Twilio voice minutes: ~$0.014/min inbound
+- ElevenLabs API: Based on your plan's character/minute allocation
+- Estimated total for ~50 calls/month (avg 3 min each): $5-15/month
+
+---
+
+## STEP 8: DATA COLLECTION CONFIGURATION
+
+In the ElevenLabs agent settings, configure these data collection fields to extract from every conversation:
+
+### Extracted Fields
+1. **caller_name** (string) — "The caller's name if provided"
+2. **caller_email** (string) — "The caller's email address if provided"
+3. **caller_company** (string) — "The company or organization the caller represents"
+4. **visitor_type** (enum: recruiter, hiring_manager, freelance_client, general) — "What type of visitor is calling"
+5. **opportunity_type** (string) — "The job role, project type, or reason for calling"
+6. **tech_stack_discussed** (string) — "Any specific technologies or requirements discussed"
+7. **follow_up_needed** (boolean) — "Whether the caller requested or would benefit from a follow-up from Chris"
+
+### Evaluation Criteria (Optional)
+Configure these to automatically flag qualified leads:
+- **Qualified Lead**: Caller provided contact info AND has an active role/project
+- **High Priority**: Caller is actively hiring for an AI engineering role OR has a funded project with timeline
+- **Information Only**: Caller was exploring, no specific opportunity
+
+---
+
+## STEP 9: WIDGET EMBED (Website Integration)
+
+Add the ElevenLabs widget to your portfolio site. In `apps/api/static/index.html`, add before the closing `</body>` tag:
+
+```html
+<!-- ElevenLabs Conversational AI Widget -->
+<elevenlabs-convai agent-id="YOUR_AGENT_ID_HERE"></elevenlabs-convai>
+<script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+```
+
+Replace YOUR_AGENT_ID_HERE with your actual agent ID from the ElevenLabs dashboard.
+
+### Styling the Widget
+The widget appears as a floating button. To match your portfolio's dark theme with emerald accents, add to your CSS:
+
+```css
+elevenlabs-convai {
+  --elevenlabs-convai-primary-color: #7FE5C2;
+  --elevenlabs-convai-bg-color: #0f172a;
+  --elevenlabs-convai-text-color: #e2e8f0;
+}
+```
+
+Note: You may want to hide or restyle your existing chat FAB when the ElevenLabs widget is active to avoid two overlapping buttons.
+
+---
+
+## STEP 10: TESTING CHECKLIST
+
+### Website Widget Tests
+1. [ ] Widget loads on portfolio page without errors
+2. [ ] Voice conversation starts when clicking the widget
+3. [ ] Agent introduces itself correctly ("Hi, I'm Chris Combs' AI assistant...")
+4. [ ] Ask "What does Chris do?" — should mention AI engineering, production systems
+5. [ ] Ask "Tell me about his projects" — should reference V2V, orchestration platform, etc.
+6. [ ] Ask "Does he have a degree?" — should be honest (coursework, no degree) then pivot to production evidence
+7. [ ] Ask "Does he have AWS experience?" — should be honest (GCP only) then highlight Cloud Run services
+8. [ ] Say "I'm a recruiter hiring for an AI engineer role" — should adapt tone, ask about company/role
+9. [ ] Provide fake contact info — collect_contact_info tool should fire
+10. [ ] Ask to see the V2V platform — open_portfolio_link tool should fire
+
+### Phone Call Tests
+11. [ ] Call the Twilio number — agent picks up and introduces itself
+12. [ ] Full recruiter scenario: introduce yourself, ask about experience, leave contact info
+13. [ ] Full client scenario: describe a project, ask about capabilities, request callback
+14. [ ] Ask rapid-fire technical questions — agent stays accurate and concise
+15. [ ] Try to get the agent to make up experience — it should refuse and redirect
+16. [ ] End the call naturally — agent should offer to collect info before hanging up
+
+### Data Verification
+17. [ ] Check ElevenLabs dashboard — conversation logs appear
+18. [ ] Extracted fields (name, email, company) are populated correctly
+19. [ ] Lead notification webhook fires (if configured)
+20. [ ] Review conversation transcripts for accuracy against knowledge base

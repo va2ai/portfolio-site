@@ -1,0 +1,195 @@
+# Chris Combs — Complete Knowledge Base Reference
+# Upload this document to ElevenLabs Agent Knowledge Base
+
+---
+
+## PROFESSIONAL PROFILE
+
+Name: Christopher Combs
+Title: Applied AI Engineer / Technical Lead
+Current Role: Founder & Lead Engineer, Generative AI Ohio (2022 – Present)
+Previous: Independent Consulting / Systems Engineer (2009 – 2022, 13+ years)
+Location: Miamisburg, Ohio (Dayton/Cincinnati metro area)
+Email: ai@vaclaims.net
+
+---
+
+## TECHNICAL SKILLS — COMPLETE BREAKDOWN
+
+### Languages
+- Python (primary): FastAPI, async/await, Pydantic, Flask
+- TypeScript: React apps, Node.js services
+- JavaScript: Frontend and backend
+
+### AI/ML Capabilities
+- Multi-agent orchestration (built from scratch, not just using frameworks)
+- RAG pipeline design and implementation
+- Embeddings and vector search with pgvector
+- LangChain integration
+- FastMCP (Model Context Protocol) — 33 tools across 5 plugins
+- Prompt engineering with measured results
+- Structured outputs and output parsing
+- Hallucination detection and mitigation (15% → 1.5%)
+- Evaluation-driven development with golden-set regression testing
+- Citation enforcement and verification
+
+### LLM Providers (Production Experience)
+- Google Gemini 2.0, 2.5, and 3 (most extensively used)
+- OpenAI GPT-4 and GPT-5
+- Anthropic Claude
+- Model-agnostic architecture using Protocol-based abstraction and factory routing
+
+### Cloud & Infrastructure
+- Google Cloud Platform (primary):
+  - Cloud Run: 3 live production services
+  - Vertex AI: embeddings
+  - Firestore: NoSQL database
+  - Firebase Hosting
+  - Secret Manager
+  - Cloud Build
+- Cloudflare Workers: edge-deployed research agent
+- R2 Storage: edge AI deployment
+- PostgreSQL with pgvector: hybrid retrieval (vector + keyword)
+- Knowledge graphs using graph-lite relational schema
+- Docker, docker-compose
+
+### Frontend
+- React 18/19, Next.js, Vite
+- Tailwind CSS
+- WebSockets, Server-Sent Events (SSE) for streaming
+- Vanilla HTML/CSS/JS
+
+---
+
+## PROJECTS — DETAILED REFERENCE
+
+### 1. V2V Claims Intelligence Platform
+- Status: LIVE at https://vaclaims-194006.web.app
+- Stack: React + Vite frontend, Firebase hosting, Firestore database, FastAPI backend on Cloud Run, Gemini API
+- Features: BVA Search tool, Nexus Scout for medical evidence, Decision Deconstructor for case analysis
+- Purpose: Helps veterans navigate VA claims process with AI-powered analysis
+
+### 2. Multi-Agent AI Orchestration Platform
+- Architecture: Parallel critic agents, iterative refinement with convergence logic, pub/sub event bus
+- Testing: 76 test functions
+- Design: Protocol-based abstractions for model-agnostic agent definitions
+- Scale: 173 agent skills, 46 database/API integrations
+
+### 3. RAG Decision Analysis System
+- Search: Hybrid retrieval using pgvector (vector similarity) + keyword matching
+- Output: Citation-backed synthesis — every claim traceable to source
+- Schema: Graph-lite relational design for structured knowledge
+- Quality: Part of the hallucination reduction pipeline (15% → 1.5%)
+
+### 4. MCP Toolbox Server
+- Tools: 33 tools across 5 plugins
+- Plugins: Gemini, FAL (image generation), Reddit, R2 Storage, Projects
+- Protocol: FastMCP implementation
+- Integration: Works with any MCP-compatible client
+
+### 5. Edge Deep Research Agent
+- Deployment: Cloudflare Workers (edge computing)
+- Features: Source quality scoring, conflict detection across sources
+- Storage: R2 for edge-deployed data
+- Purpose: Fast, distributed research synthesis
+
+### 6. LLM Compaction Benchmark
+- Scale: 36 model combinations tested
+- Models: 6 different Gemini models evaluated
+- Results: Improved quality scores from 70% to 97%+
+- Validation: 100% fact recall maintained across compaction levels
+
+### 7. Hybrid Hallucination Reduction Demo
+- Type: Interactive side-by-side comparison
+- Architecture: Pre-validated data pipeline vs. raw LLM output
+- Key insight: Architecture beats model size — cheaper model with guardrails outperforms expensive model without them
+
+### 8. Portfolio Agent Site (This Project)
+- Stack: FastAPI backend on Cloud Run, Gemini-powered conversational AI, markdown knowledge base, vanilla HTML/CSS/JS frontend
+- Design: The site itself demonstrates the stack it promotes
+- Architecture: Zero tool-calling, pure knowledge-grounded conversation
+
+---
+
+## VERIFIED METRICS
+
+### Measurable Achievements
+- Hallucination reduction: 15% → 1.5% citation error rate (5-layer validation, measured over 4 weeks in production)
+- Workflow efficiency: ~50% reduction in preparation/review time for regulatory workflows
+- Model optimization: 36 model combinations benchmarked, quality improved from 70% to 97%+, with 100% fact recall
+- Production scale: 173 agent skills, 46 database/API integrations, 3 Cloud Run services, 33 MCP tools, 76 test functions, 30+ code repositories
+- Development velocity: Rapid delivery from December 2025 through March 2026
+
+---
+
+## WORK HISTORY
+
+### Generative AI Ohio — Founder & Lead Engineer (2022 – Present)
+- Built and deployed production AI systems on GCP
+- Developed multi-agent orchestration platform from scratch
+- Created RAG pipelines with measurable hallucination reduction
+- Shipped 3 Cloud Run services to production
+- Built 33 MCP tools across 5 plugin categories
+
+### Independent Consulting / Systems Engineer (2009 – 2022)
+- 13+ years of solo consulting and systems engineering
+- Full-stack development across web and systems projects
+- Continuous self-directed learning and skill development
+
+### Education
+- Sinclair Community College — Coursework in Computer Science and Software Development (2001-2003)
+- No completed degree
+- 15+ years of continuous self-directed learning and production delivery
+
+---
+
+## JOB SEARCH DETAILS
+
+### Target Roles
+- Applied AI Engineer
+- AI/ML Engineer (application layer, not model training)
+- Full-Stack AI Developer
+- Technical Lead (AI-focused)
+
+### Preferences
+- Remote work preferred
+- Hybrid considered within Dayton/Cincinnati metro area
+- Open to relocation for the right opportunity
+- Competitive market rate for applied AI engineering
+
+### What Chris Is Looking For
+- Meaningful AI work with real production impact
+- Shipping to users, not just prototyping
+- Technical depth over management
+- Teams that value evidence over credentials
+
+---
+
+## FREQUENTLY ASKED QUESTIONS
+
+### Does Chris have a college degree?
+Chris completed coursework in Computer Science at Sinclair Community College (2001-2003) but did not finish the degree. He has 15+ years of continuous self-directed learning and 3 production AI services currently running.
+
+### Has Chris worked on large teams?
+Chris's career has been primarily solo work — independent consulting and his own AI company. He hasn't led enterprise-scale teams. What this means is he owns the entire stack: architecture, implementation, deployment, monitoring.
+
+### Does Chris have AWS experience?
+No. Chris is GCP-focused with production experience in Cloud Run, Vertex AI, Firestore, Firebase, Secret Manager, and Cloud Build. No AWS or Azure production deployments.
+
+### Can Chris train ML models?
+Chris works at the application/integration layer — building systems that use LLMs effectively (RAG, agents, prompt engineering, evaluation). He does not do model training, fine-tuning, or scikit-learn pipelines.
+
+### Does Chris have any certifications?
+No formal certifications. His evidence is production systems and measured outcomes.
+
+### What about enterprise scale?
+Chris's systems serve real users but are not enterprise-scale — no thousands of concurrent users, no multi-region deployments, no formal SLAs. His strength is building and shipping complete AI systems end-to-end.
+
+### Is Chris willing to relocate?
+Open to relocation for the right opportunity. Prefers remote. Hybrid within Dayton/Cincinnati metro area is fine.
+
+### What's Chris's salary expectation?
+Competitive market rate for applied AI engineering. Specifics depend on role scope, location, and company stage.
+
+### What makes Chris different from other AI engineers?
+Three things: (1) He ships — 3 live production services, not just notebooks and demos. (2) He measures — the hallucination reduction from 15% to 1.5% was tracked over 4 weeks with specific methodology. (3) He's honest about gaps — no degree, solo work, GCP only — and lets the production systems speak for themselves.
