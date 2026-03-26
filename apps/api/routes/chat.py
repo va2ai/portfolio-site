@@ -157,7 +157,7 @@ async def demo_compare(req: DemoRequest):
             config = types.GenerateContentConfig(
                 system_instruction=system,
                 temperature=0.7,
-                max_output_tokens=600,
+                max_output_tokens=2048,
             )
             # Minimize thinking for 2.5 Pro (it returns thinking blocks that break .text)
             if "2.5" in model:

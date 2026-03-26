@@ -1,40 +1,55 @@
 # Projects
 
-## 1. Veteran2Veteran (V2V) Platform
+## 1. AI Agent Orchestration Platform
+**Purpose:** Multi-agent coordination system serving as reference architecture for enterprise agent systems.
+**Architecture:** Parallel AI critics that run simultaneously, iterative refinement loops, convergence logic that determines when agents agree, pub/sub event bus for communication, tool-use guardrails, and traceable run history.
+**Testing:** 76 test functions across 6 test files, 75+ automated tests total.
+**Tech stack:** Python, FastAPI, LangChain, React/TypeScript, Docker, WebSockets, Pydantic.
+**Key feature:** Agents check each other's work before producing final output. Safety rules prevent bad outputs from reaching users.
+
+## 2. RAG Decision Analysis System
+**Purpose:** Production pipeline for extracting and querying legal decisions from the Board of Veterans' Appeals.
+**Architecture:** Hybrid search combining pgvector vector similarity with keyword matching. Citation-backed synthesis that shows exactly where every answer comes from. Graph-lite relational schema for connecting related decisions.
+**Validation:** Tested against an outcome-balanced BVA decision corpus (20 decisions balanced across granted, denied, and remanded outcomes).
+**Tech stack:** Python, PostgreSQL, pgvector, Gemini 2.0 Flash, Docker.
+**Key feature:** Every answer is traceable to source documents and can be audited.
+
+## 3. V2V Claims Intelligence Platform
 **Live URL:** https://vaclaims-194006.web.app
-**Stack:** React + Vite + Firebase Hosting, FastAPI backend on Cloud Run, Firestore
-**What it does:** VA disability claims intelligence site for veterans. Articles, guides, AI-powered tools (BVA case search, Nexus Scout, Decision Deconstructor, VA Math Calculator), and contextual chat.
-**Key technical details:**
-- RAG-grounded contextual chat with SSE streaming
-- BVA case search API with structured data extraction
-- Content pipeline: markdown → JSON → Firestore with static fallback
-- Image optimization pipeline (WebP conversion, responsive sizing)
+**Purpose:** Full-stack consumer platform helping veterans build stronger VA disability claims.
+**Features:** AI-powered BVA Search, Nexus Scout (finds connections between conditions and service), Decision Deconstructor (breaks down complex legal decisions), and contextual chat.
+**Architecture:** React frontend with Vite, Firebase Hosting, Firestore data layer, GCP Cloud Run backend with Gemini integration.
+**Tech stack:** React, TypeScript, Firebase, GCP Cloud Run, Gemini.
+**Key feature:** Real users access this platform to understand VA disability claim decisions.
 
-## 2. Multi-Agent AI Platform
-**Live URL:** (this portfolio site)
-**Stack:** FastAPI, google-genai, pgvector, Docker, Cloud Run
-**What it does:** Pluggable multi-agent AI platform with function calling (parallel + compositional), research agents, and web search tools.
-**Key technical details:**
-- Protocol-based LLM abstraction (swap providers without code changes)
-- Agent registry with delegation (agents can hand off to specialized sub-agents)
-- 9 built-in tools with parallel execution within rounds
-- Compositional tool chaining across rounds
-- In-memory session management with 40-message truncation
+## 4. MCP Toolbox Server
+**Purpose:** Plugin-based Model Context Protocol server providing tools to AI assistants.
+**Scope:** 33 tools across 5 plugins: Gemini (AI generation), FAL (image/video generation), Reddit (content access), R2 (cloud storage), and Projects (project management).
+**Deployment:** GCP Cloud Run with Secret Manager integration for secure credential handling.
+**Tech stack:** Python, FastMCP framework, GCP Cloud Run.
+**Key feature:** Demonstrates ability to build standardized tool interfaces for AI systems.
 
-## 3. BVA API
-**Live URL:** https://bva-api-301313738047.us-central1.run.app
-**Stack:** Python, FastAPI, Cloud Run
-**What it does:** API for searching and analyzing Board of Veterans' Appeals decisions. Structured data extraction from legal documents.
+## 5. Edge Deep Research Agent
+**Purpose:** Autonomous research agent that performs multi-round web research at global scale.
+**Architecture:** Deployed on Cloudflare Workers for edge computing. Performs source quality scoring, conflict detection, and hallucination mitigation. Returns citation-backed synthesis with structured responses.
+**Tech stack:** TypeScript, Cloudflare Workers, REST APIs, JSON Schemas.
+**Key feature:** Sub-second latency targets with global distribution.
 
-## 4. Hybrid Hallucination Reduction System
-**Live Demo:** Available on this site (interactive comparison)
-**What it does:** Demonstrates the architecture for reducing AI hallucination in financial analytics. Pre-validates data, computes all numbers deterministically in code, declares null fields as unavailable, then constrains the LLM to write language around verified facts only.
-**Key result:** Reduced confident wrong answers from ~15% to ~1.5% in financial reporting scenarios.
-**Architecture:** Validate → Compute (deterministic JS) → Guard nulls → Constrained generate
+## 6. LLM Compaction Benchmark
+**Purpose:** Evaluation framework for comparing AI model performance on text compaction tasks.
+**Scope:** 36 model combinations tested across 6 Gemini models.
+**Results:** Prompt engineering improved quality scores from 70% to 97%+ with 100% fact recall. Quality retention ranged from 76.5% to 132.3%. Smaller models sometimes beat larger ones.
+**Tech stack:** Python, Gemini API, Chart.js for visualization.
+**Key feature:** Demonstrates rigorous, data-driven approach to AI model selection.
 
-## 5. 170+ Agent Skills Library
-**What it does:** Built and maintains a library of 170+ specialized skills for AI agents, covering domains from scientific research to SEO to document generation.
-**Key technical details:**
-- Each skill is a structured prompt with domain expertise, tool integrations, and quality standards
-- Skills are dynamically loaded and composed at runtime
-- Covers: scientific computing, bioinformatics, financial analysis, content creation, code review, and more
+## 7. Hybrid Hallucination Reduction Demo
+**Live Demo:** Available on portfolio site at /demo
+**Purpose:** Interactive side-by-side comparison showing that architecture beats model size. An expensive model with raw data vs the cheapest model with pre-validated, pre-computed data.
+**Architecture:** Validate → Compute (deterministic JS) → Guard nulls → Constrained generate. 24 financial analytics scenarios covering LTV:CAC, blended ROAS, cash runway, cohort retention, multi-product margin, break-even analysis, and more.
+**Key result:** The cheapest model with hybrid architecture consistently outperforms the most expensive model running blind — correct numbers at a fraction of the cost.
+
+## 8. Portfolio Agent Site
+**Live URL:** (this site)
+**Purpose:** AI portfolio agent that represents Chris to employers and clients. Visitors interact with a conversational agent grounded in verified resume/project data.
+**Architecture:** FastAPI backend on Cloud Run, Gemini-powered chat agent with knowledge base loaded from markdown files, vanilla HTML/CSS/JS frontend with slide-out chat panel.
+**Key feature:** The site itself IS the portfolio piece — built with the same stack it demonstrates.

@@ -148,6 +148,57 @@
     </div>
   </div>
 
+  <!-- ElevenLabs Voice Agent Widget -->
+  <elevenlabs-convai
+    agent-id="YOUR_AGENT_ID"
+    avatar-orb-color-1="#7FE5C2"
+    avatar-orb-color-2="#10b981"
+    action-text="Talk to Chris's AI"
+    start-call-text="Start conversation"
+    end-call-text="End conversation"
+    listening-text="Listening..."
+    speaking-text="Speaking..."
+  ></elevenlabs-convai>
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const widget = document.querySelector('elevenlabs-convai');
+    if (widget) {
+      widget.addEventListener('elevenlabs-convai:call', (event) => {
+        event.detail.config.clientTools = {
+          collect_contact_info: async (params) => {
+            console.log('Lead captured:', JSON.stringify(params));
+            const leads = JSON.parse(localStorage.getItem('agent_leads') || '[]');
+            leads.push({ ...params, timestamp: new Date().toISOString() });
+            localStorage.setItem('agent_leads', JSON.stringify(leads));
+            return "Contact information saved. Chris will follow up soon.";
+          },
+          schedule_callback: async (params) => {
+            console.log('Callback requested:', JSON.stringify(params));
+            const leads = JSON.parse(localStorage.getItem('agent_leads') || '[]');
+            leads.push({ type: 'callback', ...params, timestamp: new Date().toISOString() });
+            localStorage.setItem('agent_leads', JSON.stringify(leads));
+            return "Callback request noted. Chris will reach out at your preferred time.";
+          },
+          open_portfolio_link: ({ url }) => {
+            const allowed = [
+              'https://github.com/va2ai',
+              'https://linkedin.com/in/va2ai',
+              'https://vaclaims.net',
+              'mailto:ai@vaclaims.net'
+            ];
+            if (allowed.some(u => url.startsWith(u))) {
+              window.open(url, '_blank', 'noopener,noreferrer');
+            }
+            return "Opening the link for you now.";
+          }
+        };
+      });
+    }
+  });
+  </script>
+
   <script src="/static/js/portfolio.js"></script>
 </body>
 </html>
