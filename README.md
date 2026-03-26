@@ -2,6 +2,8 @@
 
 Multi-agent AI platform with pluggable tools, parallel + compositional function calling, agent delegation, and a built-in research system. Powered by Google Gemini.
 
+**Live:** https://portfolio-agent-301313738047.us-central1.run.app
+
 ## Quick Start
 
 ```bash
