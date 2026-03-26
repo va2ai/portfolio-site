@@ -1,0 +1,22 @@
+{
+  "name": "portfolio-agent-greeting",
+  "type": "llm",
+  "chat_history": [
+    {
+      "role": "agent",
+      "message": "Hello, how can I help you today?",
+      "time_in_call_secs": 0
+    }
+  ],
+  "dynamic_variables": {},
+  "from_conversation_metadata": {
+    "conversation_id": "",
+    "agent_id": "agent_6701kmnfg8yse7pryc23jh9ejfy0",
+    "workflow_node_id": null,
+    "original_agent_reply": []
+  },
+  "success_condition": "",
+  "success_examples": [],
+  "failure_examples": [],
+  "tool_call_parameters": null
+}
