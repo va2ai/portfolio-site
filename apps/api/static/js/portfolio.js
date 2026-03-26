@@ -179,9 +179,20 @@ function handleElevenLabsToolCall(toolName, params) {
   }
 }
 
-function initElevenLabsWidget() {
+async function initElevenLabsWidget() {
   const widget = document.querySelector('elevenlabs-convai');
   if (!widget) return;
+
+  // Load agent ID from backend config
+  try {
+    const res = await fetch('/api/config');
+    const config = await res.json();
+    if (config.elevenlabs_agent_id) {
+      widget.setAttribute('agent-id', config.elevenlabs_agent_id);
+    }
+  } catch (err) {
+    console.error('Failed to load ElevenLabs config:', err);
+  }
 
   widget.addEventListener('elevenlabs-convai:call', (event) => {
     const { tool_name, parameters } = event.detail || {};
