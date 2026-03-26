@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)",
+      "Bash(find /c/Users/ccdmn/code/portfolio-site -type d -not -path */.* -not -path */__pycache__*)"
+    ]
+  }
+}
