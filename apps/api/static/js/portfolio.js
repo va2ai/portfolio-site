@@ -126,80 +126,58 @@ const PORTFOLIO_LINKS = {
   bva_api: 'https://bva-api-301313738047.us-central1.run.app',
 };
 
-function handleElevenLabsToolCall(toolName, params) {
-  switch (toolName) {
-    case 'collect_contact_info':
-      fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...params,
-          source: 'elevenlabs_voice_agent',
-        }),
-      }).catch(err => console.error('Lead capture failed:', err));
-      return { success: true, message: 'Contact info saved. Chris will follow up.' };
-
-    case 'schedule_callback':
-      fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...params,
-          lead_type: 'callback_request',
-          source: 'elevenlabs_voice_agent',
-        }),
-      }).catch(err => console.error('Callback request failed:', err));
-      return { success: true, message: 'Callback request sent. Chris will reach out to confirm a time.' };
-
-    case 'open_portfolio_link': {
-      const url = PORTFOLIO_LINKS[params.link_type];
-      if (url) {
-        window.open(url, '_blank');
-        return { success: true, message: `Opened ${params.link_type} in a new tab.` };
-      }
-      return { success: false, message: 'Link not found.' };
-    }
-
-    case 'notify_chris':
-      fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Voice Agent Notification',
-          topic: params.summary,
-          priority: params.priority || 'normal',
-          lead_type: 'notification',
-          source: 'elevenlabs_voice_agent',
-        }),
-      }).catch(err => console.error('Notification failed:', err));
-      return { success: true, message: 'Chris has been notified.' };
-
-    default:
-      return { success: false, message: 'Unknown tool.' };
-  }
-}
-
-async function initElevenLabsWidget() {
+function initElevenLabsWidget() {
   const widget = document.querySelector('elevenlabs-convai');
   if (!widget) return;
 
-  // Load agent ID from backend config
-  try {
-    const res = await fetch('/api/config');
-    const config = await res.json();
-    if (config.elevenlabs_agent_id) {
-      widget.setAttribute('agent-id', config.elevenlabs_agent_id);
-    }
-  } catch (err) {
-    console.error('Failed to load ElevenLabs config:', err);
-  }
-
   widget.addEventListener('elevenlabs-convai:call', (event) => {
-    const { tool_name, parameters } = event.detail || {};
-    if (tool_name) {
-      const result = handleElevenLabsToolCall(tool_name, parameters || {});
-      event.detail.resolve(result);
-    }
+    event.detail.config.clientTools = {
+      collect_contact_info: async (params) => {
+        fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...params,
+            source: 'elevenlabs_voice_agent',
+          }),
+        }).catch(err => console.error('Lead capture failed:', err));
+        return 'Contact information saved. Chris will follow up.';
+      },
+      schedule_callback: async (params) => {
+        fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...params,
+            lead_type: 'callback_request',
+            source: 'elevenlabs_voice_agent',
+          }),
+        }).catch(err => console.error('Callback request failed:', err));
+        return 'Callback request sent. Chris will reach out to confirm a time.';
+      },
+      open_portfolio_link: async (params) => {
+        const url = PORTFOLIO_LINKS[params.link_type];
+        if (url) {
+          window.open(url, '_blank');
+          return `Opened ${params.link_type} in a new tab.`;
+        }
+        return 'Link not found.';
+      },
+      notify_chris: async (params) => {
+        fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Voice Agent Notification',
+            topic: params.summary,
+            priority: params.priority || 'normal',
+            lead_type: 'notification',
+            source: 'elevenlabs_voice_agent',
+          }),
+        }).catch(err => console.error('Notification failed:', err));
+        return 'Chris has been notified.';
+      },
+    };
   });
 }
 
