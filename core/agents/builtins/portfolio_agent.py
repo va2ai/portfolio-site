@@ -98,5 +98,5 @@ portfolio_agent = AgentDefinition(
     description="AI portfolio agent for Chris Combs — answers questions about skills, projects, and experience grounded in verified data",
     system_prompt=PORTFOLIO_SYSTEM_PROMPT,
     tools=[],
-    model="gemini-2.5-flash",
+    model="gemini-3-flash-preview",
 )

@@ -124,3 +124,50 @@ async def chat(req: ChatRequest):
 async def clear_session(session_id: str):
     _sessions.pop(session_id, None)
     return {"status": "cleared"}
+
+
+# ─── Demo endpoint (Hybrid vs Prompt-Only comparison) ─────────────
+
+class DemoRequest(BaseModel):
+    naive_system: str
+    naive_user: str
+    hybrid_system: str
+    hybrid_user: str
+
+
+@router.post("/demo")
+async def demo_compare(req: DemoRequest):
+    """Run two LLM calls in parallel: naive (prompt-only) and hybrid (constrained)."""
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or settings.google_api_key
+    if not api_key:
+        return {"error": "Server configuration error: no API key set."}
+
+    from google import genai
+    from google.genai import types
+    import asyncio
+
+    client = genai.Client(api_key=api_key)
+    model = "gemini-3-flash-preview"
+
+    async def call_gemini(system: str, user: str) -> str:
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=[types.Content(role="user", parts=[types.Part.from_text(text=user)])],
+                config=types.GenerateContentConfig(
+                    system_instruction=system,
+                    temperature=0.7,
+                    max_output_tokens=600,
+                ),
+            )
+            return response.text or "No response."
+        except Exception as e:
+            logger.error(f"Demo Gemini error: {e}", exc_info=True)
+            return f"Error: {e}"
+
+    naive_result, hybrid_result = await asyncio.gather(
+        call_gemini(req.naive_system, req.naive_user),
+        call_gemini(req.hybrid_system, req.hybrid_user),
+    )
+
+    return {"naive": naive_result, "hybrid": hybrid_result}

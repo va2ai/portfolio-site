@@ -142,28 +142,22 @@
       return { computed, steps };
     }
 
-    async function callClaude(apiKey, systemPrompt, userMessage) {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    async function callDemoAPI(naiveSystem, naiveUser, hybridSystem, hybridUser) {
+      const resp = await fetch("/api/demo", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 600,
-          system: systemPrompt,
-          messages: [{ role: "user", content: userMessage }],
+          naive_system: naiveSystem,
+          naive_user: naiveUser,
+          hybrid_system: hybridSystem,
+          hybrid_user: hybridUser,
         }),
       });
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
         throw new Error(err.error?.message || `API ${resp.status}: ${resp.statusText}`);
       }
-      const data = await resp.json();
-      return data.content?.map(b => b.text || "").join("") || "No response content";
+      return await resp.json();
     }
 
     function Dots() {
@@ -209,8 +203,6 @@
     }
 
     function HybridDemo() {
-      const [apiKey, setApiKey] = useState("");
-      const [keySubmitted, setKeySubmitted] = useState(false);
       const [activeIdx, setActiveIdx] = useState(0);
       const [phase, setPhase] = useState("idle");
       const [promptResult, setPromptResult] = useState("");
@@ -219,7 +211,6 @@
       const [visibleSteps, setVisibleSteps] = useState(0);
       const [showPayload, setShowPayload] = useState(false);
       const [error, setError] = useState(null);
-      const [showKey, setShowKey] = useState(false);
 
       const scenario = SCENARIOS[activeIdx];
 
@@ -240,7 +231,6 @@
         try {
           const naiveSystem = `You are a financial analytics assistant for an ecommerce platform. Answer the seller's question using the JSON data provided. Be helpful, give specific numbers, and provide context like comparisons, benchmarks, or recommendations where you can.`;
           const naiveUser = `Seller question: "${scenario.question}"\n\nSeller data (JSON from platform API):\n${JSON.stringify(scenario.payload, null, 2)}`;
-          const naivePromise = callClaude(apiKey, naiveSystem, naiveUser);
 
           const { computed, steps } = computeDerivedFields(scenario.payload);
           setComputeSteps(steps);
@@ -267,126 +257,21 @@ UNAVAILABLE FIELDS (do not guess): ${nullsRemaining.length > 0 ? nullsRemaining.
 
 Answer using ONLY the pre-computed data.`;
 
-          const hybridPromise = callClaude(apiKey, hybridSystem, hybridUser);
-
-          const [naiveResp, hybridResp] = await Promise.all([naivePromise, hybridPromise]);
-          setPromptResult(naiveResp);
-          setHybridResult(hybridResp);
+          const data = await callDemoAPI(naiveSystem, naiveUser, hybridSystem, hybridUser);
+          setPromptResult(data.naive);
+          setHybridResult(data.hybrid);
           setPhase("done");
         } catch (e) {
           setError(e.message);
           setPhase("error");
         }
-      }, [scenario, apiKey]);
+      }, [scenario]);
 
       const cssVars = {
         "--mono": "'Fira Code', 'SF Mono', 'Consolas', monospace",
         "--sans": "'Libre Franklin', 'Helvetica Neue', sans-serif",
         "--display": "'Playfair Display', 'Georgia', serif",
       };
-
-      // API Key Entry
-      if (!keySubmitted) {
-        return (
-          <div style={{
-            ...cssVars,
-            minHeight: "100vh",
-            background: "#07080d",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "var(--sans)",
-            padding: 20,
-          }}>
-            <div style={{
-              width: "100%", maxWidth: 460,
-              background: "#0d0e16", border: "1px solid #1c1f2e",
-              borderRadius: 14, padding: "32px 28px",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 18 }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#f43f5e", boxShadow: "0 0 10px #f43f5e55" }} />
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b98155" }} />
-                <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f", letterSpacing: "0.1em", textTransform: "uppercase", marginLeft: 3 }}>
-                  Hybrid Architecture Demo
-                </span>
-              </div>
-
-              <h1 style={{
-                fontFamily: "var(--display)", fontSize: 26, fontWeight: 700,
-                color: "#f4f5f7", margin: "0 0 6px", lineHeight: 1.15,
-              }}>
-                Prompt-Only <span style={{ color: "#555d6f", fontWeight: 400 }}>vs</span> Hybrid System
-              </h1>
-              <p style={{ fontSize: 13, color: "#6b7280", lineHeight: 1.5, margin: "0 0 22px" }}>
-                Real Claude API calls showing the difference between sending raw financial
-                data to an LLM versus pre-validating and computing first.
-              </p>
-
-              <label style={{
-                display: "block", fontSize: 9, fontFamily: "var(--mono)",
-                color: "#555d6f", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5,
-              }}>
-                Anthropic API Key
-              </label>
-              <div style={{ position: "relative", marginBottom: 14 }}>
-                <input
-                  type={showKey ? "text" : "password"}
-                  value={apiKey}
-                  onChange={e => setApiKey(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && apiKey.startsWith("sk-")) setKeySubmitted(true); }}
-                  placeholder="sk-ant-api03-..."
-                  spellCheck={false}
-                  autoComplete="off"
-                  style={{
-                    width: "100%", padding: "9px 64px 9px 12px",
-                    background: "#0a0b11", border: "1px solid #1c1f2e",
-                    borderRadius: 7, color: "#dfe2ea", fontSize: 13,
-                    fontFamily: "var(--mono)", outline: "none", boxSizing: "border-box",
-                  }}
-                  onFocus={e => e.target.style.borderColor = "#3b82f6"}
-                  onBlur={e => e.target.style.borderColor = "#1c1f2e"}
-                />
-                <button onClick={() => setShowKey(s => !s)} style={{
-                  position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", color: "#555d6f",
-                  fontSize: 10, fontFamily: "var(--mono)", cursor: "pointer", padding: "2px 5px",
-                }}>
-                  {showKey ? "hide" : "show"}
-                </button>
-              </div>
-
-              <button
-                onClick={() => setKeySubmitted(true)}
-                disabled={!apiKey.startsWith("sk-")}
-                style={{
-                  width: "100%", padding: "10px 0", borderRadius: 7, border: "none",
-                  background: apiKey.startsWith("sk-") ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#1c1f2e",
-                  color: apiKey.startsWith("sk-") ? "#fff" : "#555",
-                  fontSize: 13, fontWeight: 600,
-                  cursor: apiKey.startsWith("sk-") ? "pointer" : "not-allowed",
-                  fontFamily: "var(--sans)",
-                  boxShadow: apiKey.startsWith("sk-") ? "0 2px 14px rgba(59,130,246,0.2)" : "none",
-                }}
-              >
-                Launch Demo &rarr;
-              </button>
-
-              <div style={{
-                marginTop: 14, padding: "9px 11px",
-                background: "#0a0b11", borderRadius: 6, border: "1px solid #1c1f2e",
-              }}>
-                <div style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Security
-                </div>
-                <div style={{ fontSize: 10, color: "#4b5563", lineHeight: 1.4 }}>
-                  Key is held in React state only — not saved to localStorage, cookies, or any backend.
-                  Each run makes 2 API calls (~1,200 tokens, ~$0.01). View source to verify.
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
 
       // Main Demo
       return (
@@ -402,23 +287,23 @@ Answer using ONLY the pre-computed data.`;
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b98155" }} />
                   <span style={{ fontSize: 9, fontFamily: "var(--mono)", color: "#555d6f", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    Live &middot; Real Claude Sonnet Calls
+                    Live &middot; Real Gemini 3 Flash Calls
                   </span>
                 </div>
                 <h1 style={{ fontFamily: "var(--display)", fontSize: "clamp(22px,3.2vw,34px)", fontWeight: 700, color: "#f4f5f7", margin: 0, lineHeight: 1.1 }}>
                   Prompt-Only <span style={{ color: "#555d6f", fontWeight: 400 }}>vs</span> Hybrid System
                 </h1>
               </div>
-              <button onClick={() => { setKeySubmitted(false); reset(); }} style={{
+              <a href="/" style={{
                 padding: "4px 10px", borderRadius: 5, border: "1px solid #1c1f2e",
                 background: "transparent", color: "#555d6f", fontSize: 9,
-                fontFamily: "var(--mono)", cursor: "pointer",
+                fontFamily: "var(--mono)", cursor: "pointer", textDecoration: "none",
               }}>
-                Change Key
-              </button>
+                Portfolio
+              </a>
             </div>
             <p style={{ fontSize: 12, color: "#6b7280", marginTop: 4, maxWidth: 580, lineHeight: 1.5 }}>
-              Both sides call Claude with the same question and JSON payload.
+              Both sides call Gemini with the same question and JSON payload.
               Left sends it raw. Right validates, computes, and constrains first.
             </p>
           </div>
@@ -470,7 +355,7 @@ Answer using ONLY the pre-computed data.`;
                   fontFamily: "var(--sans)",
                   boxShadow: phase !== "running" ? "0 2px 10px #f43f5e44" : "none",
                 }}>
-                  {phase === "idle" ? "\u25B6 Call Claude" : phase === "running" ? "\u23F3 Calling..." : "\u21BB Run Again"}
+                  {phase === "idle" ? "\u25B6 Call Gemini" : phase === "running" ? "\u23F3 Calling..." : "\u21BB Run Again"}
                 </button>
               </div>
             </div>
@@ -642,7 +527,7 @@ Answer using ONLY the pre-computed data.`;
 
           <div style={{ maxWidth: 1120, margin: "12px auto 0", textAlign: "center" }}>
             <span style={{ fontSize: 9, color: "#1e2030", fontFamily: "var(--mono)" }}>
-              chris combs &middot; github.com/va2ai &middot; real claude sonnet calls, not simulated
+              chris combs &middot; github.com/va2ai &middot; real gemini api calls, not simulated
             </span>
           </div>
         </div>
