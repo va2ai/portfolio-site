@@ -1,5 +1,5 @@
 /**
- * Portfolio Site — Chat Panel Logic
+ * Portfolio Site — Chat Panel & Interactions
  */
 
 let sessionId = '';
@@ -11,12 +11,19 @@ const chatInput = document.getElementById('chatInput');
 const chatSendBtn = document.getElementById('chatSendBtn');
 const chatToggle = document.getElementById('chatToggle');
 
+// Toggle chat panel
 function toggleChat() {
   chatOpen = !chatOpen;
   chatPanel.classList.toggle('open', chatOpen);
-  if (chatOpen) chatInput.focus();
+  if (chatOpen) {
+    chatInput.focus();
+    chatToggle.style.transform = 'scale(0)';
+  } else {
+    chatToggle.style.transform = 'scale(1)';
+  }
 }
 
+// Send message
 async function sendChat() {
   const text = chatInput.value.trim();
   if (!text || chatSendBtn.disabled) return;
@@ -82,8 +89,9 @@ function removeTyping() {
   if (el) el.remove();
 }
 
+// Audience quick-start
 function startChat(audience) {
-  toggleChat();
+  if (!chatOpen) toggleChat();
   let greeting = '';
   if (audience === 'recruiter') {
     greeting = "Hi, I'm a recruiter. Tell me about Chris's experience and what makes him stand out.";
@@ -96,6 +104,20 @@ function startChat(audience) {
   }
 }
 
+// Scroll Animations
+function initScrollReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+// Init
 document.addEventListener('DOMContentLoaded', () => {
   chatToggle.addEventListener('click', toggleChat);
   chatSendBtn.addEventListener('click', sendChat);
@@ -105,4 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
       sendChat();
     }
   });
+
+  initScrollReveal();
 });

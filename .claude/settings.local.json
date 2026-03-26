@@ -3,7 +3,11 @@
     "allow": [
       "Bash(gh auth:*)",
       "Bash(gh repo:*)",
-      "Bash(find /c/Users/ccdmn/code/portfolio-site -type d -not -path */.* -not -path */__pycache__*)"
+      "Bash(find /c/Users/ccdmn/code/portfolio-site -type d -not -path */.* -not -path */__pycache__*)",
+      "Bash(curl -s http://localhost:8001/health)",
+      "Bash(curl -s http://localhost:8001/openapi.json)",
+      "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(''''\\\\n''''.join\\(sorted\\(data[''''paths''''].keys\\(\\)\\)\\)\\)\")",
+      "Bash(gcloud run:*)"
     ]
   }
 }

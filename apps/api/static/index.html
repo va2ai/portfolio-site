@@ -10,12 +10,14 @@
 </head>
 <body>
 
+  <div class="neural-bg"></div>
+
   <!-- Navigation -->
   <nav class="site-nav">
-    <div class="nav-logo">
+    <a href="/" class="nav-logo">
       <div class="dot"></div>
       <span>Chris Combs</span>
-    </div>
+    </a>
     <div class="nav-links">
       <a href="/" class="active">Portfolio</a>
       <a href="/demo">Live Demo</a>
@@ -24,35 +26,36 @@
   </nav>
 
   <!-- Hero -->
-  <section class="hero">
+  <section class="hero reveal">
     <h1>I build AI systems that <span class="accent">ship to production</span>, check their own work, and show where every answer comes from.</h1>
     <p class="subtitle">AI/ML engineer with 15+ years shipping software. Currently focused on multi-agent architectures, RAG pipelines, and making AI systems you can actually trust.</p>
 
     <div class="audience-split">
       <button class="audience-btn" onclick="startChat('recruiter')">
         <span class="label">I'm Hiring</span>
-        Talk to my AI agent about my experience
+        <span class="text">Talk to my AI agent about my experience</span>
       </button>
       <button class="audience-btn" onclick="startChat('client')">
         <span class="label">I Need Something Built</span>
-        Tell my AI agent what you're working on
+        <span class="text">Tell my AI agent what you're working on</span>
       </button>
     </div>
 
+    <!-- Metrics -->
     <div class="metrics-grid">
-      <div class="metric-card">
+      <div class="metric-card reveal">
         <div class="value">15% &rarr; 1.5%</div>
         <div class="label">Hallucination Reduction</div>
       </div>
-      <div class="metric-card">
+      <div class="metric-card reveal">
         <div class="value">170+</div>
         <div class="label">Agent Skills Built</div>
       </div>
-      <div class="metric-card">
+      <div class="metric-card reveal">
         <div class="value">3</div>
         <div class="label">Live Cloud Run Services</div>
       </div>
-      <div class="metric-card">
+      <div class="metric-card reveal">
         <div class="value">15+ yrs</div>
         <div class="label">Shipping Software</div>
       </div>
@@ -60,40 +63,40 @@
   </section>
 
   <!-- Projects -->
-  <section style="max-width: 1120px; margin: 0 auto; padding: 0 24px;">
-    <h2 class="section-title">Projects</h2>
+  <section id="projects">
+    <h2 class="section-title reveal">Projects</h2>
     <div class="projects-grid">
-      <div class="project-card">
-        <h3>Veteran2Veteran Platform</h3>
+      <div class="project-card reveal">
         <div class="tech">React + Vite + Firebase + FastAPI + Cloud Run</div>
+        <h3>Veteran2Veteran Platform</h3>
         <p>VA disability claims intelligence site. Articles, guides, AI-powered tools (BVA search, Nexus Scout, Decision Deconstructor), contextual RAG chat.</p>
-        <a href="https://vaclaims-194006.web.app" target="_blank">vaclaims-194006.web.app &rarr;</a>
+        <a href="https://vaclaims-194006.web.app" target="_blank">View Site &rarr;</a>
       </div>
-      <div class="project-card">
-        <h3>Multi-Agent AI Platform</h3>
+      <div class="project-card reveal">
         <div class="tech">FastAPI + Gemini + pgvector + Docker</div>
+        <h3>Multi-Agent AI Platform</h3>
         <p>Pluggable multi-agent platform with parallel function calling, compositional tool chaining, research agents, and provider-agnostic LLM abstraction.</p>
-        <a href="https://github.com/va2ai/ai-agent-platform" target="_blank">github.com/va2ai &rarr;</a>
+        <a href="https://github.com/va2ai/ai-agent-platform" target="_blank">View GitHub &rarr;</a>
       </div>
-      <div class="project-card">
-        <h3>BVA API</h3>
+      <div class="project-card reveal">
         <div class="tech">Python + FastAPI + Cloud Run</div>
+        <h3>BVA API</h3>
         <p>API for searching and analyzing Board of Veterans' Appeals decisions. Structured data extraction from legal documents.</p>
         <a href="https://bva-api-301313738047.us-central1.run.app" target="_blank">Live API &rarr;</a>
       </div>
-      <div class="project-card">
-        <h3>Hybrid Hallucination Reduction</h3>
+      <div class="project-card reveal">
         <div class="tech">JavaScript + Claude API + Systems Architecture</div>
+        <h3>Hybrid Hallucination Reduction</h3>
         <p>Live interactive demo: pre-validate data, compute deterministically, guard nulls, then constrain LLM generation. Reduced confident wrong answers from 15% to 1.5%.</p>
-        <a href="/demo">Try the live demo &rarr;</a>
+        <a href="/demo">Try Live Demo &rarr;</a>
       </div>
     </div>
   </section>
 
   <!-- Tech Stack -->
-  <section style="max-width: 1120px; margin: 0 auto; padding: 0 24px;">
-    <h2 class="section-title">Stack</h2>
-    <div class="tech-grid">
+  <section id="stack">
+    <h2 class="section-title reveal">Stack</h2>
+    <div class="tech-grid reveal">
       <span class="tech-tag">Python</span>
       <span class="tech-tag">FastAPI</span>
       <span class="tech-tag">React</span>
@@ -114,21 +117,21 @@
   </section>
 
   <!-- Contact -->
-  <section class="contact-section">
+  <section class="contact-section reveal">
     <h2 class="section-title">Get in Touch</h2>
-    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+    <p style="color: var(--text-secondary); font-size: 16px; margin-bottom: 24px;">
       Use the chat agent to ask questions about my work, or reach out directly.
     </p>
-    <p style="font-size: 13px; font-family: var(--mono);">
+    <div style="font-family: var(--mono); font-size: 14px;">
       <a href="https://github.com/va2ai" target="_blank">github.com/va2ai</a>
-    </p>
+    </div>
   </section>
 
   <div class="footer">chris combs &middot; built with the same stack it demonstrates</div>
 
   <!-- Chat Toggle Button -->
   <button class="chat-toggle" id="chatToggle" title="Chat with AI Agent">
-    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
   </button>
 
   <!-- Chat Panel -->
@@ -147,57 +150,6 @@
       <button id="chatSendBtn">Send</button>
     </div>
   </div>
-
-  <!-- ElevenLabs Voice Agent Widget -->
-  <elevenlabs-convai
-    agent-id="YOUR_AGENT_ID"
-    avatar-orb-color-1="#7FE5C2"
-    avatar-orb-color-2="#10b981"
-    action-text="Talk to Chris's AI"
-    start-call-text="Start conversation"
-    end-call-text="End conversation"
-    listening-text="Listening..."
-    speaking-text="Speaking..."
-  ></elevenlabs-convai>
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const widget = document.querySelector('elevenlabs-convai');
-    if (widget) {
-      widget.addEventListener('elevenlabs-convai:call', (event) => {
-        event.detail.config.clientTools = {
-          collect_contact_info: async (params) => {
-            console.log('Lead captured:', JSON.stringify(params));
-            const leads = JSON.parse(localStorage.getItem('agent_leads') || '[]');
-            leads.push({ ...params, timestamp: new Date().toISOString() });
-            localStorage.setItem('agent_leads', JSON.stringify(leads));
-            return "Contact information saved. Chris will follow up soon.";
-          },
-          schedule_callback: async (params) => {
-            console.log('Callback requested:', JSON.stringify(params));
-            const leads = JSON.parse(localStorage.getItem('agent_leads') || '[]');
-            leads.push({ type: 'callback', ...params, timestamp: new Date().toISOString() });
-            localStorage.setItem('agent_leads', JSON.stringify(leads));
-            return "Callback request noted. Chris will reach out at your preferred time.";
-          },
-          open_portfolio_link: ({ url }) => {
-            const allowed = [
-              'https://github.com/va2ai',
-              'https://linkedin.com/in/va2ai',
-              'https://vaclaims.net',
-              'mailto:ai@vaclaims.net'
-            ];
-            if (allowed.some(u => url.startsWith(u))) {
-              window.open(url, '_blank', 'noopener,noreferrer');
-            }
-            return "Opening the link for you now.";
-          }
-        };
-      });
-    }
-  });
-  </script>
 
   <script src="/static/js/portfolio.js"></script>
 </body>
