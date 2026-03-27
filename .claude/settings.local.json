@@ -7,7 +7,9 @@
       "Bash(curl -s http://localhost:8001/health)",
       "Bash(curl -s http://localhost:8001/openapi.json)",
       "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(''''\\\\n''''.join\\(sorted\\(data[''''paths''''].keys\\(\\)\\)\\)\\)\")",
-      "Bash(gcloud run:*)"
+      "Bash(gcloud run:*)",
+      "WebFetch(domain:elevenlabs.io)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
